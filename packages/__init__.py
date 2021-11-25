@@ -11,4 +11,5 @@ __all__ = ["DataPre",\
             "makedatasets",\
             "algorithm.Attitude_Angle_solution",\
             "algorithm.cutting_algorithm",\
-            "algorithm.emg_correct"]
+            "algorithm.emg_correct",\
+            "algorithm.emg_feature"]

@@ -7,6 +7,7 @@ import os
 from algorithm.cutting_algorithm import cut_data, stretch
 from algorithm.Attitude_Angle_solution import data_change
 from algorithm.emg_correct import correct
+from algorithm.emg_feature import EMGDataFeature
 
 ## 数据预处理
 class DataPreprocessing():
@@ -96,6 +97,16 @@ class ExtractDataFeature():
                     data_time: 拉伸到data_time时间长度
                     isFill: 决定数据是否需要填补
                     isIncreEmgDim: 决定EMG数据是否需要扩充维度
+            kwargs_feature: 数据特征提取参数
+                args:
+                    EMGFeatureType: 提取EMG数据的特征类型，包括：[IEMG, MAV, MAV1, MAV2, SSI, VAR, TM_N, RMS, V, LOG, WL, AAC, DASDV, ZC, MYOP, WAMP, SSC, MAVSLP, MHW, MTW, HIST, HIST, AR, CC]
+                    EMGFeatureKwargs: 对应EMG数据特征的参数
+                        ZC_threshold: ZC对应的阈值，默认值为0
+                        MYOP_threshold: MYOP对应的阈值，默认值为0
+                        WAMP_threshold: WAMP对应的阈值，默认值为0
+                        SSC_threshold: SSC对应的阈值，默认值为0
+                        K: MAVSLP的特征参数，EMG数据对应的分段数，默认值为3
+                        N: TM_N对应的阶数
         '''
         self.emg, self.imu = None, None
         self.kwargs_pre = kwargs['DataPreprocess']
@@ -104,7 +115,36 @@ class ExtractDataFeature():
 
     ## 提取emg信号特征
     def EmgFeature(self, ):
-        pass
+        '''进行EMG数据的特征提取
+
+            args:
+                FeatureType: 选择需要的EmgFeature类型，特征类型：[IEMG, MAV, MAV1, MAV2, SSI, VAR, TM_N, RMS, V, LOG, WL, AAC, DASDV, ZC, MYOP, WAMP, SSC, MAVSLP, MHW, MTW, HIST, HIST, AR, CC]
+                ZC_threshold: Numerical boundary, The default value of 0.
+                MYOP_threshold: Numerical boundary, The default value of 0.
+                WAMP_threshold: Numerical boundary, The default value of 0.
+                SSC_threshold: Numerical boundary, The default value of 0.
+                K: is number of segments covering the EMG signal, The default value of 3.
+                N: Order number
+        '''
+        EMGFeatureTypes = self.kwargs_feature['EMGFeatureTypes']
+        EMGFeatureKwargs = self.kwargs_feature['EMGFeatureKwargs']
+        if ('ZC' in EMGFeatureTypes) and ('ZC_threshold' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"ZC_threshold\" !')
+        if ('MYOP' in EMGFeatureTypes) and ('MYOP_threshold' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"MYOP_threshold\" !')
+        if ('WAMP' in EMGFeatureTypes) and ('WAMP_threshold' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"WAMP_threshold\" !')
+        if ('SSC' in EMGFeatureTypes) and ('SSC_threshold' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"SSC_threshold\" !')
+        if ('MAVSLP' in EMGFeatureTypes) and ('K' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"K\" !')
+        if ('TM_N' in EMGFeatureTypes) and ('N' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"N\" !')
+        feature_list = []
+        feature = EMGDataFeature(self.emg)
+        for EMGFeatureType in EMGFeatureTypes:
+            feature_list.append(feature.getFeature(EMGFeatureType, EMGFeatureKwargs))
+        return tuple(feature_list)
 
     ## 提取imu信号特征
     def ImuFeature(self, ):
