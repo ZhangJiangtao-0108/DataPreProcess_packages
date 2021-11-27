@@ -97,3 +97,4 @@ kwargs = {
 
 ## References
 [1]. Feature reduction and selection for EMG signal classification
+
