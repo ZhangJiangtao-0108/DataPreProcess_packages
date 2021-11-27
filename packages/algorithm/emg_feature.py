@@ -9,18 +9,11 @@ class EMGDataFeature():
         self.Data = Data
         self.__DataLen = len(self.Data)
 
-    # @classmethod
-
-    # @property.setter
-    # def Data(self, Data):
-    #     self.Data = Data
-    #     self.__DataLen = len(self.Data)
-
     def IEMG(self, ):
         '''
             Definiyion of IEMG feature is definend as a summation of absolute value of the EMG sign amplitude.
         '''
-        IEMGFeature = np.sum(np.abs(self.Data), axis = 1)
+        IEMGFeature = np.sum(np.abs(self.Data), axis = 0)
         return IEMGFeature
     
     def MAV(self, ):
@@ -34,34 +27,34 @@ class EMGDataFeature():
         '''
             Modified mean absolute value type 1 (MAV1) is an extension of MAV feature. The weighted window function wi is assigned into the equation for improving robustness of MAV feature.
         '''
-        MAV1Feature = np.sum(np.abs(self.Data[int(0.25*self.__DataLen) : int(0.75*self.__DataLen)]), axis= 1)
-        MAV1Feature = MAV1Feature + np.sum(np.abs(self.Data[ : int(0.25*self.__DataLen)]), axis= 1) * 0.5
-        MAV1Feature = MAV1Feature + np.sum(np.abs(self.Data[int(0.75*self.__DataLen) : ]), axis= 1) * 0.5
+        MAV1Feature = np.sum(np.abs(self.Data[int(0.25*self.__DataLen) : int(0.75*self.__DataLen)]), axis= 0)
+        MAV1Feature = MAV1Feature + np.sum(np.abs(self.Data[ : int(0.25*self.__DataLen)]), axis= 0) * 0.5
+        MAV1Feature = MAV1Feature + np.sum(np.abs(self.Data[int(0.75*self.__DataLen) : ]), axis= 0) * 0.5
         return MAV1Feature / self.__DataLen
 
     def MAV2(self, ):
         '''
             Modified mean absolute value type 2 (MAV2) is an expansion of MAV feature which is similar to the MAV1 Phinyomark. However, the weighted window function wi that s assigned into the equation is a continuous function. It improves smoothness of the weighted function.
         ''' 
-        MAV2Feature = np.sum(np.abs(self.Data[int(0.25*self.__DataLen) : int(0.75*self.__DataLen)]), axis= 1)
+        MAV2Feature = np.sum(np.abs(self.Data[int(0.25*self.__DataLen) : int(0.75*self.__DataLen)]), axis= 0)
         for i in range(int(0.25 * self.__DataLen)):
-            MAV2Feature += np.abs(self.Data[i]) * (4 * i) / self.__DataLen
+            MAV2Feature = MAV2Feature + np.abs(self.Data[i]) * (4 * i) / self.__DataLen
         for i in range(int(0.75 * self.__DataLen), self.__DataLen):
-            MAV2Feature += np.abs(self.Data[i]) * (4 * (i - self.__DataLen)) / self.__DataLen 
+            MAV2Feature = MAV2Feature + np.abs(self.Data[i]) * (4 * (i - self.__DataLen)) / self.__DataLen 
         return MAV2Feature / self.__DataLen
         
     def SSI(self, ):
         '''
             Simple square integral (SSI) or integral square uses energy of the EMG signal as a feature. It is a summation of square values of the EMG signal amplitude. Generally, this parameter is defined as an energy index.
         '''
-        SSIFeature = np.sum(np.power(self.Data, 2), axis= 1)
+        SSIFeature = np.sum(np.power(self.Data, 2), axis= 0)
         return SSIFeature
 
     def VAR(self, ):
         '''
             variance is defined as an average of square values of the deviation of that variable.
         '''
-        VARFeature = self.SSI / (self.__DataLen - 1)
+        VARFeature = self.SSI() / (self.__DataLen - 1)
         return VARFeature
 
     def TM_N(self, N):
@@ -71,14 +64,14 @@ class EMGDataFeature():
             args:
                 N: Order number
         '''
-        TMFeature = np.sum(np.power(self.Data, N), axis= 1) / self.__DataLen
+        TMFeature = np.sum(np.power(self.Data, N), axis= 0) / self.__DataLen
         return TMFeature
     
     def RMS(self, ):
         '''
             Root mean square (RMS) is another popular feature in analysis of the EMG signal. It is also similar to standard deviation method.
         '''
-        return np.power(self.SSI, 0.5)
+        return np.power(self.SSI(), 0.5)
     
     def V(self, v:int):
         '''
@@ -87,21 +80,21 @@ class EMGDataFeature():
             args:
                 v: is the corresponding order.
         '''
-        VFeature =np.power(np.sum(np.power(self.Data, v), axis= 1) / self.__DataLen, 1 / v) 
+        VFeature =np.power(np.sum(np.power(self.Data, v), axis= 0) / self.__DataLen, 1 / v) 
         return VFeature
 
     def LOG(self, ):
         '''
             Like the V feature, this feature also provides an estimate of the muscle contraction force.
         '''
-        LOGFeature = np.exp(np.sum(np.log(np.abs(self.Data)), axis= 1) / self.__DataLen)
+        LOGFeature = np.exp(np.sum(np.log(np.abs(self.Data)), axis= 0) / self.__DataLen)
         return LOGFeature
     
     def WL(self, ):
         '''
             Like the V feature, this feature also provides an estimate of the muscle contraction force.It is defined as cumulative length of the EMG waveform over the time segment. Some literatures called this feature as wavelength (WAVE).
         '''
-        WLFeature = np.sum(np.abs(self.Data[1:self.__DataLen] - self.Data[:(self.__DataLen - 1)]), axis= 1)
+        WLFeature = np.sum(np.abs(self.Data[1:self.__DataLen] - self.Data[:(self.__DataLen - 1)]), axis= 0)
         return WLFeature
 
     def AAC(self, ):
@@ -115,7 +108,7 @@ class EMGDataFeature():
             Difference absolute standard deviation value (DASDV) is look like RMS feature, in other words, it is a standard deviation value of the wavelength.        
         '''
 
-        WL_2 = np.sum(np.power((self.Data[1:self.__DataLen] - self.Data[:(self.__DataLen - 1)]), 2), axis= 1)
+        WL_2 = np.sum(np.power((self.Data[1:self.__DataLen] - self.Data[:(self.__DataLen - 1)]), 2), axis= 0)
         DASDVFeature = np.power((WL_2 / (self.__DataLen - 1)), 0.5)
         return DASDVFeature
     
@@ -131,7 +124,7 @@ class EMGDataFeature():
         ZCFeature = np.zeros(self.Data.shape[1])
         ZCFeature_matrix = (zero_count == threshold_count)
         for i in range(self.Data.shape[1]):
-            ZCFeature[i] = ZCFeature_matrix[:,i].count(True)
+            ZCFeature[i] = list(ZCFeature_matrix[:,i]).count(True)
         return ZCFeature
 
     def MYOP(self, threshold = 0):
@@ -144,7 +137,7 @@ class EMGDataFeature():
         MYOPFeature = np.zeros(self.Data.shape[1])
         count_EMG_matrix = self.Data >= threshold
         for i in range(len(MYOPFeature)):
-            MYOPFeature[i] = count_EMG_matrix[:,i].count(True)
+            MYOPFeature[i] = list(count_EMG_matrix[:,i]).count(True)
         return MYOPFeature  / self.__DataLen
 
     def WAMP(self, threshold = 0):
@@ -154,10 +147,10 @@ class EMGDataFeature():
             args:
                 threshold: Numerical boundary, The default value of 0.
         '''
-        WAMPFeature = np.zeros(self.Data[1])
+        WAMPFeature = np.zeros(self.Data.shape[1])
         count__EMG_matrix = (self.Data[: (self.__DataLen - 1)] - self.Data[1:]) >= threshold
         for i in range(len(WAMPFeature)):
-            WAMPFeature[i] = count__EMG_matrix[:,i].count(True)
+            WAMPFeature[i] = list(count__EMG_matrix[:,i]).count(True)
         return WAMPFeature
 
     def SSC(self, threshold = 0):
@@ -173,7 +166,7 @@ class EMGDataFeature():
             count_EMG_matrix[i] = (self.Data[i] - self.Data[i-1]) * (self.Data[i] - self.Data[i+1])
         count_EMG_matrix = count_EMG_matrix[1: (self.__DataLen - 1)] >= threshold
         for i in range(len(SSCFeature)):
-            SSCFeature[i] = count_EMG_matrix[:, i].count(True)
+            SSCFeature[i] = list(count_EMG_matrix[:, i]).count(True)
         return SSCFeature
     
     def MAVSLP(self, K = 3):
@@ -186,7 +179,7 @@ class EMGDataFeature():
         MAVSLPFeature = np.zeros((K-1, self.Data.shape[1]))
         segment = self.__DataLen / K
         for i in range(K-1):
-            MAVSLPFeature[i] = (np.sum(np.abs(self.Data[int((i + 1) * segment) : int((i + 2) * segment)]), axis= 1) - np.sum(np.abs(self.Data[int(i * segment) : int((i + 1) * segment)]), axis= 1)) / segment
+            MAVSLPFeature[i] = (np.sum(np.abs(self.Data[int((i + 1) * segment) : int((i + 2) * segment)]), axis= 0) - np.sum(np.abs(self.Data[int(i * segment) : int((i + 1) * segment)]), axis= 0)) / segment
         return MAVSLPFeature
 
     def MHW(self, K = 1):
@@ -197,7 +190,7 @@ class EMGDataFeature():
                 K: The size of the Hamming Whindows, the default value is 1.
         '''
         window = signal.hanning(K)
-        MHWFeature = np.sum(np.power(self.Data * window, 2), axis= 1)
+        MHWFeature = np.sum(np.power(self.Data * window, 2), axis= 0)
         return MHWFeature
 
     def MTW(self, K = 1):
@@ -208,7 +201,7 @@ class EMGDataFeature():
                 K: The size of the Hamming Whindows, the default value is 1.
         '''
         window = signal.hanning(K)
-        MTWFeature = np.sum(np.power(self.Data , 2)* window, axis= 1)
+        MTWFeature = np.sum(np.power(self.Data , 2)* window, axis= 0)
         return MTWFeature
 
     def HIST(self, ):
@@ -302,4 +295,4 @@ class EMGDataFeature():
         elif FeatureType == "CC":
             return self.CC()
         else:
-            return TypeError("Not this type Feature!!")
+            raise TypeError("Not " + FeatureType + " Feature!!")
