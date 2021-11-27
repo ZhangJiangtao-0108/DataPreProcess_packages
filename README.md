@@ -28,7 +28,7 @@ from DataPreProcess_packages import *
 - VAR: variance is defined as an average of square values of the deviation of that variable.
 - TM_N: Temporal moment is a statistical analysis. the absolute value was taken to greatly reduce the within class separation for the odd moment case.
 - RMS: Root mean square (RMS) is another popular feature in analysis of the EMG signal. It is also similar to standard deviation method.
-- V:
+- V: The v-Order (V) is a non-linear detector that implicitly estimates muscle contraction force.
 - LOG: Like the V feature, this feature also provides an estimate of the muscle contraction force.
 - WL: Like the V feature, this feature also provides an estimate of the muscle contraction force.It is defined as cumulative length of the EMG waveform over the time segment. Some literatures called this feature as wavelength (WAVE).
 - ACC: Average amplitude change (AAC) is nearly equivalent to WL feature, except that wavelength is averaged. A number of research studies called this feature as difference absolute mean value (DAMV); however, its definition divides WL value by length N minus one.
@@ -38,8 +38,8 @@ from DataPreProcess_packages import *
 - WAMP: Willison amplitude or Wilson amplitude (WAMP) is a measure of frequency information of the EMG signal as same as defines in ZC feature. It is a number of times resulting from difference between the EMG signal amplitude among two adjoining segments that exceeds a pre-defined threshold.
 - SSC: Slope sign change (SSC) is related to ZC, MYOP, and WAMP features. It is another method to represent frequency information of the EMG signal. It is a number of times that slope of the EMG signal changes sign. The number of changes between the positive and negative slopes among three sequential segments is performed with the threshold function for avoiding background noise in the EMG signal.
 - MAVSLP: Mean absolute value slope (MAVSLP) is a modified version of MAV feature to establish multiple features. Differences between MAVs of the adjacent segments are determined.
-- MHW: 
-- MTW: 
+- MHW: Multiple hamming windows (MHW) are an original version of multiple time windows method. The raw EMG signal is segmented by the Hamming windows on all time series. The MHW features are computed using each window’s energy.
+- MTW: Multiple trapezoidal windows (MTW) are one type of the multiple time windows method.  Like the MHW, this feature method uses the energy contained inside a window as feature values, but the function of window w is changing from the Hamming windows to the trapezoidal windows, which in Du’s study, the trapezoidal windowing function performed the best ones. 
 - HIST: 
 - AR: 
 - CC: 
@@ -56,13 +56,16 @@ kwargs = {
                   "isIncreEmgDim":True
                    },
     "kwargs_feature":{
-                    "EMGFeatureType":[IEMG, MAV, MAV1, MAV2, SSI, VAR, TM_N, RMS, V, LOG, WL, AAC, DASDV, ZC, MYOP, WAMP, SSC, MAVSLP, MHW, MTW, HIST, HIST, AR, CC],
+                    "EMGFeatureType":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"],
                     "EMGFeatureKwargs":{
                                         "ZC_threshold":0,
                                         "MYOP_threshold":0,
                                         "WAMP_threshold":0,
                                         "SSC_threshold":0,
-                                        "K":3,
+                                        "v":1,
+                                        "MAVSLP_K":3,
+                                        "MHW_K":1,
+                                        "MTW_K":1,
                                         "N":2
                                         }
                     },
