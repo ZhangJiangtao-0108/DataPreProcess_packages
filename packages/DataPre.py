@@ -109,9 +109,10 @@ class ExtractDataFeature():
                         N: TM_N对应的阶数
         '''
         self.emg, self.imu = None, None
-        self.kwargs_pre = kwargs['DataPreprocess']
-        self.kwargs_feature = kwargs['DataFeature']  
-        self.dataPre = DataPreprocessing(self.kwargs_pre)
+        kwargs = kwargs['kwargs']
+        self.kwargs_pre = kwargs['kwargs_pre']
+        self.kwargs_feature = kwargs['kwargs_feature']  
+        self.dataPre = DataPreprocessing(kwargs = self.kwargs_pre)
 
     ## 提取emg信号特征
     def EmgFeature(self, ):
@@ -123,9 +124,13 @@ class ExtractDataFeature():
                 MYOP_threshold: Numerical boundary, The default value of 0.
                 WAMP_threshold: Numerical boundary, The default value of 0.
                 SSC_threshold: Numerical boundary, The default value of 0.
-                K: is number of segments covering the EMG signal, The default value of 3.
+                MAVSLP_K: is number of segments covering the EMG signal, The default value of 3.
+                MHW_K: is the size of the hamming windows, the default value is 1
+                MTW_K: is the size of the hamming windows, the default value is 1
                 N: Order number
+                v: is the vorresponding of the feature V, the default value is 1
         '''
+        # print(self.kwargs_feature)
         EMGFeatureTypes = self.kwargs_feature['EMGFeatureTypes']
         EMGFeatureKwargs = self.kwargs_feature['EMGFeatureKwargs']
         if ('ZC' in EMGFeatureTypes) and ('ZC_threshold' not in EMGFeatureKwargs):
@@ -138,12 +143,20 @@ class ExtractDataFeature():
             return KeyError('The EMGFeatureKwargs don\'t have \"SSC_threshold\" !')
         if ('MAVSLP' in EMGFeatureTypes) and ('K' not in EMGFeatureKwargs):
             return KeyError('The EMGFeatureKwargs don\'t have \"K\" !')
+        if ('V' in EMGFeatureTypes) and ('v' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"v\" !')
+        if ('MAVSLP' in EMGFeatureTypes) and ('MAVSLP_K' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"MAVSLP_K\" !')
+        if ('MHW' in EMGFeatureTypes) and ('MHW_K' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"MHW_K\" !')
+        if ('MTW' in EMGFeatureTypes) and ('MTW_K' not in EMGFeatureKwargs):
+            return KeyError('The EMGFeatureKwargs don\'t have \"MTW_K\" !')
         if ('TM_N' in EMGFeatureTypes) and ('N' not in EMGFeatureKwargs):
             return KeyError('The EMGFeatureKwargs don\'t have \"N\" !')
         feature_list = []
         feature = EMGDataFeature(self.emg)
         for EMGFeatureType in EMGFeatureTypes:
-            feature_list.append(feature.getFeature(EMGFeatureType, EMGFeatureKwargs))
+            feature_list.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs))
         return tuple(feature_list)
 
     ## 提取imu信号特征
@@ -183,8 +196,8 @@ def ReadData(dataPath):
     for emgDataName in emgDataNames:
         emgDataPath = dataPath + 'emg/' + emgDataName
         imuDataPath = emgDataPath.replace('emg', 'imu')
-        print(emgDataPath)
-        print(imuDataPath)
+        # print(emgDataPath)
+        # print(imuDataPath)
         ## 读取文件
         emgFile = open(emgDataPath, 'r')
         imuFile = open(imuDataPath, 'r')
@@ -208,12 +221,16 @@ def ReadData(dataPath):
 ## 数据处理生成器
 def dataGenerator(dataPath, kwargs):
     data = ReadData(dataPath)
-    dataPre = DataPreprocessing(kwargs = kwargs)
+    # print(kwargs)
+    # dataPre = DataPreprocessing(kwargs = kwargs)
+    dataFeatureExtract = ExtractDataFeature(kwargs = kwargs)
     while True:
         try:
             emg, imu, label, scale = next(data)
-            emg_pre, imu_pre = dataPre.DataPreprocessse(emg, imu)
-            yield np.array(emg_pre), np.array(imu_pre), label, scale
+            # emg_pre, imu_pre = dataPre.DataPreprocessse(emg, imu)
+            # yield np.array(emg_pre), np.array(imu_pre), label, scale
+            emg_feature, imu_feature = dataFeatureExtract.getFeature(emg, imu)
+            yield np.array(emg_feature), np.array(imu_feature), label, scale
         except StopIteration:
             return
 
