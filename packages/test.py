@@ -12,7 +12,7 @@ if __name__ == '__main__':
                   "isIncreEmgDim":True
                    },
     "kwargs_feature":{
-                    "EMGFeatureTypes":["IEMG"],
+                    "EMGFeatureTypes":["MTW"], 
                     "EMGFeatureKwargs":{
                                         "ZC_threshold":0,
                                         "MYOP_threshold":0,
@@ -28,5 +28,7 @@ if __name__ == '__main__':
 }
 dataFeature = iter(dataGenerator(datapath, kwargs))
 for emg_feature, imu_feature, label, scale in dataFeature:
-    print(emg_feature)
+    # print(emg_feature.shape)
     # print(imu_feature.shape)
+    print(label)
+    print(scale)
