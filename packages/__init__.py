@@ -6,6 +6,8 @@
 import numpy as np
 import os
 import DataPre
+import makedatasets
+from algorithm import *
 
 __all__ = ["DataPre",\
             "makedatasets",\
