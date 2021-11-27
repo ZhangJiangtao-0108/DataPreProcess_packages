@@ -8,5 +8,6 @@ setup(
                 "packages.makedatasets",\
                 "packages.algorithm.Attitude_Angle_solution",\
                 "packages.algorithm.cutting_algorithm",\
-                "packages.algorithm.emg_correct"]
+                "packages.algorithm.emg_correct",\
+                "oackages.algorithm.emg_feature"]
 )
