@@ -30,7 +30,7 @@ from DataPreProcess_packages import *
 - RMS: Root mean square (RMS) is another popular feature in analysis of the EMG signal. It is also similar to standard deviation method.
 - V: The v-Order (V) is a non-linear detector that implicitly estimates muscle contraction force.
 - LOG: Like the V feature, this feature also provides an estimate of the muscle contraction force.
-- WL: Like the V feature, this feature also provides an estimate of the muscle contraction force.It is defined as cumulative length of the EMG waveform over the time segment. Some literatures called this feature as wavelength (WAVE).
+- WL: Like the V feature, this feature also provides an estimate of the muscle contraction force. It is defined as cumulative length of the EMG waveform over the time segment. Some literatures called this feature as wavelength (WAVE).
 - ACC: Average amplitude change (AAC) is nearly equivalent to WL feature, except that wavelength is averaged. A number of research studies called this feature as difference absolute mean value (DAMV); however, its definition divides WL value by length N minus one.
 - DASDV: Difference absolute standard deviation value (DASDV) is look like RMS feature, in other words, it is a standard deviation value of the wavelength.
 - ZC: Zero crossing (ZC) is a measure of frequency information of the EMG signal that is defined in time domain. It is a number of times that amplitude values of the EMG signal cross zero amplitude level. To avoid lowvoltage fluctuations or background noises, threshold condition is implemented.
@@ -71,4 +71,29 @@ kwargs = {
                     },
 }
 ```
+### EMG data feature table
+| EMGFeatureTypes | parameter | describe |
+|-----------------|-----------|----------|
+| IEMG | None | None |
+| MAV | None | None |
+| MAV1 | None | None |
+| MAV2 | None | None |
+| SSI | None | None |
+| VAR | None | None |
+| TM_N | N | Order Number, The default value of 2 |
+| RMS | None | None |
+| V | v | is the vorresponding of the feature V, the default value is 1 |
+| LOG | None | None |
+| WL | None | None |
+| AAC | None | None |
+| DASDV | None | None |
+| ZC | ZC_threshold | is numerical boundary, The default value of 0 |
+| MYOP | MYOP_threshold | is numerical boundary, The default value of 0 |
+| WAMP | WAMP_threshold | is numerical boundary, The default value of 0 |
+| SSC | SSC_thresholdNone | is numerical boundary, The default value of 0 |
+| MAVSLP | MAVSLP_K | is number of segments covering the EMG signal, The default value of 3 |
+| MHW | MHW_K | is the size of the hamming windows, the default value is 1 |
+| MTW | MTW_K | is the size of the hamming windows, the default value is 1 |
 
+## References
+[1]. Feature reduction and selection for EMG signal classification
