@@ -134,25 +134,25 @@ class ExtractDataFeature():
         EMGFeatureTypes = self.kwargs_feature['EMGFeatureTypes']
         EMGFeatureKwargs = self.kwargs_feature['EMGFeatureKwargs']
         if ('ZC' in EMGFeatureTypes) and ('ZC_threshold' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"ZC_threshold\" !')
+            raise KeyError("The EMGFeatureKwargs don't have \"ZC_threshold\" !")
         if ('MYOP' in EMGFeatureTypes) and ('MYOP_threshold' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"MYOP_threshold\" !')
+            raise KeyError("The EMGFeatureKwargs don't have \"MYOP_threshold\" !")
         if ('WAMP' in EMGFeatureTypes) and ('WAMP_threshold' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"WAMP_threshold\" !')
+            raise KeyError("The EMGFeatureKwargs don't have \"WAMP_threshold\" !")
         if ('SSC' in EMGFeatureTypes) and ('SSC_threshold' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"SSC_threshold\" !')
-        if ('MAVSLP' in EMGFeatureTypes) and ('K' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"K\" !')
-        if ('V' in EMGFeatureTypes) and ('v' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"v\" !')
+            raise KeyError("The EMGFeatureKwargs don't have \"SSC_threshold\" !")
         if ('MAVSLP' in EMGFeatureTypes) and ('MAVSLP_K' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"MAVSLP_K\" !')
+            raise KeyError("The EMGFeatureKwargs don't have \"MAVSLP_K\" !")
+        if ('V' in EMGFeatureTypes) and ('v' not in EMGFeatureKwargs):
+            raise KeyError("The EMGFeatureKwargs don't have \"v\" !")
+        if ('MAVSLP' in EMGFeatureTypes) and ('MAVSLP_K' not in EMGFeatureKwargs):
+            raise KeyError("The EMGFeatureKwargs don't have \"MAVSLP_K\" !")
         if ('MHW' in EMGFeatureTypes) and ('MHW_K' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"MHW_K\" !')
+            raise KeyError("The EMGFeatureKwargs don't have \"MHW_K\" !")
         if ('MTW' in EMGFeatureTypes) and ('MTW_K' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"MTW_K\" !')
+            raise KeyError("The EMGFeatureKwargs don't have \"MTW_K\" !")
         if ('TM_N' in EMGFeatureTypes) and ('N' not in EMGFeatureKwargs):
-            return KeyError('The EMGFeatureKwargs don\'t have \"N\" !')
+            raise KeyError("The EMGFeatureKwargs don't have \"N\" !")
         feature_list = []
         feature = EMGDataFeature(self.emg)
         for EMGFeatureType in EMGFeatureTypes:
@@ -233,26 +233,3 @@ def dataGenerator(dataPath, kwargs):
             yield np.array(emg_feature), np.array(imu_feature), label, scale
         except StopIteration:
             return
-
-if __name__ == '__main__':
-
-    dataPath = r'C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/'
-    kwargs = {'isCut':True,
-              'isStretch':False,
-              'isFill':True,
-              'data_time':6,
-              'isIncreEmgDim':True}
-    data = iter(dataGenerator(dataPath, kwargs))
-    for emg, imu, label, scale in data:
-        print(emg.shape)
-        print(imu.shape)
-    #     pass
-        # i += 1
-        # print(i)
-    # emg, imu = next(data)
-    # print(emg.shape)
-    # print(imu.shape)
-    # emg, imu = next(data)
-    # print(emg.shape)
-    # print(imu.shape)
-
