@@ -2,18 +2,19 @@
     提取EMG信号的特征
 '''
 import numpy as np
+from  scipy import signal
 
 class EMGDataFeature():
     def __init__(self, Data) -> None:
         self.Data = Data
-        self.__DataLen = 0
+        self.__DataLen = len(self.Data)
 
     # @classmethod
 
-    @property.setter
-    def Data(self, Data):
-        self.Data = Data
-        self.__DataLen = len(self.Data)
+    # @property.setter
+    # def Data(self, Data):
+    #     self.Data = Data
+    #     self.__DataLen = len(self.Data)
 
     def IEMG(self, ):
         '''
@@ -79,11 +80,15 @@ class EMGDataFeature():
         '''
         return np.power(self.SSI, 0.5)
     
-    def V(self, ):
+    def V(self, v:int):
         '''
-        
+            The v-Order (V) is a non-linear detector that implicitly estimates muscle contraction force.
+
+            args:
+                v: is the corresponding order.
         '''
-        pass
+        VFeature =np.power(np.sum(np.power(self.Data, v), axis= 1) / self.__DataLen, 1 / v) 
+        return VFeature
 
     def LOG(self, ):
         '''
@@ -121,7 +126,13 @@ class EMGDataFeature():
             args:
                 threshold: Numerical boundary, The default value of 0.
         '''
-        pass
+        zero_count = (self.Data[0: -2] * self.Data[1: -1]) > 0
+        threshold_count = (self.Data[0: -2] - self.Data[1: -1]) > threshold
+        ZCFeature = np.zeros(self.Data.shape[1])
+        ZCFeature_matrix = (zero_count == threshold_count)
+        for i in range(self.Data.shape[1]):
+            ZCFeature[i] = ZCFeature_matrix[:,i].count(True)
+        return ZCFeature
 
     def MYOP(self, threshold = 0):
         '''
@@ -178,17 +189,27 @@ class EMGDataFeature():
             MAVSLPFeature[i] = (np.sum(np.abs(self.Data[int((i + 1) * segment) : int((i + 2) * segment)]), axis= 1) - np.sum(np.abs(self.Data[int(i * segment) : int((i + 1) * segment)]), axis= 1)) / segment
         return MAVSLPFeature
 
-    def MHW(self, ):
+    def MHW(self, K = 1):
         '''
-        
-        '''
-        pass
+            Multiple hamming windows (MHW) are an original version of multiple time windows method. The raw EMG signal is segmented by the Hamming windows on all time series. The MHW features are computed using each window’s energy.
 
-    def MTW(self, ):
+            args:
+                K: The size of the Hamming Whindows, the default value is 1.
         '''
-        
+        window = signal.hanning(K)
+        MHWFeature = np.sum(np.power(self.Data * window, 2), axis= 1)
+        return MHWFeature
+
+    def MTW(self, K = 1):
         '''
-        pass
+            Multiple trapezoidal windows (MTW) are one type of the multiple time windows method.  Like the MHW, this feature method uses the energy contained inside a window as feature values, but the function of window w is changing from the Hamming windows to the trapezoidal windows, which in Du’s study, the trapezoidal windowing function performed the best ones. 
+            
+            args:
+                K: The size of the Hamming Whindows, the default value is 1.
+        '''
+        window = signal.hanning(K)
+        MTWFeature = np.sum(np.power(self.Data , 2)* window, axis= 1)
+        return MTWFeature
 
     def HIST(self, ):
         '''
@@ -213,7 +234,15 @@ class EMGDataFeature():
             Return EMG data feature.
 
             args:
-                threshold: Numerical boundary, The default value of 0.
+                ZC_threshold: Numerical boundary, The default value of 0.
+                MYOP_threshold: Numerical boundary, The default value of 0.
+                WAMP_threshold: Numerical boundary, The default value of 0.
+                SSC_threshold: Numerical boundary, The default value of 0.
+                MAVSLP_K: is number of segments covering the EMG signal, The default value of 3.
+                MHW_K: is the size of the hamming windows, the default value is 1
+                MTW_K: is the size of the hamming windows, the default value is 1
+                N: Order number
+                v: is the vorresponding of the feature V, the default value is 1threshold: Numerical boundary, The default value of 0.
                 K: is number of segments covering the EMG signal, The default value of 3.
                 N: Order number
         '''
@@ -221,34 +250,37 @@ class EMGDataFeature():
         MYOP_threshold = kwargs.pop("MYOP_threshold", 0)
         WAMP_threshold = kwargs.pop("WAMP_threshold", 0)
         SSC_threshold = kwargs.pop("SSC_threshold", 0)
-        K = kwargs.pop("k", 3)
+        v = kwargs.pop("v", 1)
+        MAVSLP_K = kwargs.pop("MAVSLP_K", 3)
+        MHW_K = kwargs.pop("MHW_K", 1)
+        MTW_K = kwargs.pop("MTW_K", 1)
         N = kwargs.pop("N", 0)
         if FeatureType == 'IEMG':
-            return self.IEMG
+            return self.IEMG()
         elif FeatureType == "MAV":
-            return self.MAV
+            return self.MAV()
         elif FeatureType == "MAV1":
-            return self.MAV1
+            return self.MAV1()
         elif FeatureType == "MAV2":
-            return self.MAV2
+            return self.MAV2()
         elif FeatureType == "SSI":
-            return self.SSI
+            return self.SSI()
         elif FeatureType == "VAR":
-            return self.VAR
+            return self.VAR()
         elif FeatureType == "TM_N":
             return self.TM_N(N)
         elif FeatureType == "RMS":
-            return self.RMS
+            return self.RMS()
         elif FeatureType == "V":
-            return self.V
+            return self.V(v)
         elif FeatureType == "LOG":
-            return self.LOG
+            return self.LOG()
         elif FeatureType == "WL":
-            return self.WL
+            return self.WL()
         elif FeatureType == "AAC":
-            return self.AAC
+            return self.AAC()
         elif FeatureType == "DASDV":
-            return self.DASDV
+            return self.DASDV()
         elif FeatureType == "ZC":
             return self.ZC(ZC_threshold)
         elif FeatureType == "MYOP":
@@ -258,21 +290,16 @@ class EMGDataFeature():
         elif FeatureType == "SSC":
             return self.SSC(SSC_threshold)
         elif FeatureType == "MAVSLP":
-            return self.MAVSLP(K)
+            return self.MAVSLP(MAVSLP_K)
         elif FeatureType == "MHW":
-            return self.MHW
+            return self.MHW(MHW_K)
         elif FeatureType == "MTW":
-            return self.MTW
+            return self.MTW(MTW_K)
         elif FeatureType == "HIST":
-            return self.HIST
+            return self.HIST()
         elif FeatureType == "AR":
-            return self.AR
+            return self.AR()
         elif FeatureType == "CC":
-            return self.CC
+            return self.CC()
         else:
             return TypeError("Not this type Feature!!")
-
-        
-
-
-
