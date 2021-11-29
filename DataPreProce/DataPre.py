@@ -25,11 +25,11 @@ class DataPreprocessing():
         '''
         self.emg = None
         self.imu = None
-        self.isCut = kwargs['kwargs'].pop('isCut', False)
-        self.isStretch = kwargs['kwargs'].pop('isStretch', False)
-        self.data_time = kwargs['kwargs'].pop('data_time', 4)
-        self.isFill = kwargs['kwargs'].pop('isFill', False)
-        self.isIncreEmgDim = kwargs['kwargs'].pop('isIncreEmgDim', False)
+        self.isCut = kwargs['kwargs'].get('isCut', False)
+        self.isStretch = kwargs['kwargs'].get('isStretch', False)
+        self.data_time = kwargs['kwargs'].get('data_time', 4)
+        self.isFill = kwargs['kwargs'].get('isFill', False)
+        self.isIncreEmgDim = kwargs['kwargs'].get('isIncreEmgDim', False)
 
     ## 数据截切
     def DataCut(self, ):
@@ -221,14 +221,10 @@ def ReadData(dataPath):
 ## 数据处理生成器
 def dataGenerator(dataPath, kwargs):
     data = ReadData(dataPath)
-    # print(kwargs)
-    # dataPre = DataPreprocessing(kwargs = kwargs)
     dataFeatureExtract = ExtractDataFeature(kwargs = kwargs)
     while True:
         try:
             emg, imu, label, scale = next(data)
-            # emg_pre, imu_pre = dataPre.DataPreprocessse(emg, imu)
-            # yield np.array(emg_pre), np.array(imu_pre), label, scale
             emg_feature, imu_feature = dataFeatureExtract.getFeature(emg, imu)
             yield np.array(emg_feature), np.array(imu_feature), label, scale
         except StopIteration:

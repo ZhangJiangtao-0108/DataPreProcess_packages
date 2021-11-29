@@ -3,14 +3,11 @@
 '''
     可以在这个文件中批量导入所需要的模块
 '''
-import numpy as np
-import os
-import DataPre
-import makedatasets
-from algorithm import *
+
 
 __all__ = ["DataPre",\
             "makedatasets",\
+            "tesy",\
             "algorithm.Attitude_Angle_solution",\
             "algorithm.cutting_algorithm",\
             "algorithm.emg_correct",\
