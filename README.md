@@ -1,6 +1,7 @@
 # DataPreProcess_packages
 The data collected by MYO bracelet is preprocessed, including data cutting, stretching, filling and feature extraction.
 ## How to use this package
+### 1、Use&Install the data preprocessing package
 - Not to install
 ```
 git clone https://github.com/ZhangJiangtao-0108/DataPreProcess_packages.git
@@ -8,15 +9,14 @@ git clone https://github.com/ZhangJiangtao-0108/DataPreProcess_packages.git
 ```python
 import sys
 sys.path.append("packages path")
-
-from DataPreProcess_packages import *
 ```
 - install
 ```
 pip install DataPreProcess_packages-1.0.tar.gz
 ```
+### 2、Import package
 ```python
-from DataPreProcess_packages import *
+from DataPreProce import *
 ```
 
 ## Features of EMG data
@@ -45,7 +45,8 @@ from DataPreProcess_packages import *
 - CC: 
 ## Features of IMU data
 - Quaternion to Euler Angle
-## Data processing and feature extraction parameter setting
+## Parameter Settings
+### 1.Data processing and feature extraction parameter setting
 ```json
 kwargs = {
     "kwargs_pre":{
@@ -71,7 +72,7 @@ kwargs = {
                     },
 }
 ```
-### EMG data feature table
+#### EMG data feature table
 | EMGFeatureTypes | parameter | describe |
 |-----------------|-----------|----------|
 | IEMG | None | None |
@@ -94,7 +95,38 @@ kwargs = {
 | MAVSLP | MAVSLP_K | is number of segments covering the EMG signal, The default value of 3 |
 | MHW | MHW_K | is the size of the hamming windows, the default value is 1 |
 | MTW | MTW_K | is the size of the hamming windows, the default value is 1 |
-
+### 2.DataSets parameter setting
+```json
+kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
+            "SaveDataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
+            "gesture_dic_path":"C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/gesture_dic_all.txt",
+            "label_scales_path":"C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/label_scales.txt",
+            "sentence_max_label":9,
+            "DataPre_args":{
+                        "kwargs_pre":{
+                                    "isCut":True,
+                                    "isStretch":True,
+                                    "data_time":4, 
+                                    "isFill":True,
+                                    "isIncreEmgDim":True
+                                    },
+                        "kwargs_feature":{
+                                        "EMGFeatureTypes":["SSI"], 
+                                        "EMGFeatureKwargs":{
+                                                            "ZC_threshold":0,
+                                                            "MYOP_threshold":0,
+                                                            "WAMP_threshold":0,
+                                                            "SSC_threshold":0,
+                                                            "v":1,
+                                                            "MAVSLP_K":3,
+                                                            "MHW_K":1,
+                                                            "MTW_K":1,
+                                                            "N":2
+                                                            }
+                                        },
+                    }
+    }
+```
 ## References
 [1]. Feature reduction and selection for EMG signal classification
 
