@@ -1,7 +1,11 @@
 # DataPreProcess_packages
 The data collected by MYO bracelet is preprocessed, including data cutting, stretching, filling and feature extraction.
 ## How to use this package
-### 1、Use&Install the data preprocessing package
+### 1、Install related packages
+```shell
+pip install Requirement.txt
+```
+### 2、Use&Install the data preprocessing package
 - Not to install
 ```
 git clone https://github.com/ZhangJiangtao-0108/DataPreProcess_packages.git
@@ -14,7 +18,7 @@ sys.path.append("packages path")
 ```
 pip install DataPreProcess_packages-1.0.tar.gz
 ```
-### 2、Import package
+### 3、Import package
 ```python
 from DataPreProce import *
 ```
@@ -52,9 +56,20 @@ kwargs = {
     "kwargs_pre":{
                   "isCut":True,
                   "isStretch":True,
-                  "data_time":True, 
-                  "isFill":True,
-                  "isIncreEmgDim":True
+                  "data_time":4, 
+                  "isFill":False,
+                  "isFilter":False,
+                  "Filter_args":{
+                                "EmgCategory":'lowpass',
+                                "EmgWn":0.8,
+                                "EmgOrder":8,
+                                "ImuCategory":'lowpass',
+                                "ImuWn":0.8,
+                                "ImuOrder":8
+                  },
+                  "isMinusMeanEmgData":True,
+                  "isIncreEmgDim":False,
+                  "segment":100
                    },
     "kwargs_feature":{
                     "EMGFeatureType":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"],
@@ -72,6 +87,18 @@ kwargs = {
                     },
 }
 ```
+#### 'kwargs_pre' Parameter interpretation
+| Parameter | Describe |
+|-----------|----------|
+| isCut | Determine if the data needs to be cutted |
+| isStretch | Determine if the data needs to be stretched |
+| data_time | Determine the data stretch length |
+| isFill | Determine if the data needs to be filling |
+| isFilter | Determine if the data needs to be filted |
+| Filter_args | Determine if the data needs to be stretched |
+| isMinusMeanEmgData | Determine if the EMG data needs to be subtracted from the mean |
+| isIncreEmgDim | Determine whether the EMG data needs to be dimensioned |
+| segment | Number of data segments |
 #### EMG data feature table
 | EMGFeatureTypes | parameter | describe |
 |-----------------|-----------|----------|
@@ -108,7 +135,9 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
                                     "isStretch":True,
                                     "data_time":4, 
                                     "isFill":True,
-                                    "isIncreEmgDim":True
+                                    "isMinusMeanEmgData":False,
+                                    "isIncreEmgDim":True,
+                                    "segment":100
                                     },
                         "kwargs_feature":{
                                         "EMGFeatureTypes":["SSI"], 
