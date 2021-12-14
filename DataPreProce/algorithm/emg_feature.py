@@ -222,6 +222,7 @@ class EMGDataFeature():
         '''
         pass
 
+
     def getFeature(self, FeatureType, **kwargs):
         '''
             Return EMG data feature.
