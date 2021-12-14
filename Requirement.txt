@@ -1,0 +1,4 @@
+## 安装dtw库： https://github.com/wannesm/dtaidistance 
+dtaidistance -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
+## 安装pywt库： https://github.com/PyWavelets/pywt 
+PyWavelets -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
