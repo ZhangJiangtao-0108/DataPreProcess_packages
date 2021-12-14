@@ -1,13 +1,13 @@
 '''
     数据处理
 '''
-
 import numpy as np
 import os
 from algorithm.cutting_algorithm import cut_data, stretch
 from algorithm.Attitude_Angle_solution import data_change
 from algorithm.emg_correct import correct
 from algorithm.emg_feature import EMGDataFeature
+from algorithm.Butter_filter import butter_filter
 
 ## 数据预处理
 class DataPreprocessing():
@@ -17,30 +17,38 @@ class DataPreprocessing():
             args:
                 emg: EMG数据
                 imu: IMU数据
-                isCut: 决定数据是否需要裁切
-                isStretch: 决定数据是否需要拉伸
-                data_time: 拉伸到data_time时间长度
-                isFill: 决定数据是否需要填补
-                isIncreEmgDim: 决定EMG数据是否需要扩充维度
+                emg_F：EMG数据的频域处理信息
         '''
         self.emg = None
         self.imu = None
+        self.emg_F = None
         self.isCut = kwargs['kwargs'].get('isCut', False)
         self.isStretch = kwargs['kwargs'].get('isStretch', False)
         self.data_time = kwargs['kwargs'].get('data_time', 4)
         self.isFill = kwargs['kwargs'].get('isFill', False)
+        self.isFilter = kwargs['kwargs'].get('isFilter', False)
+        if self.isFilter:
+            self.Filter_args = kwargs['kwargs'].get('Filter_args')
         self.isIncreEmgDim = kwargs['kwargs'].get('isIncreEmgDim', False)
+        self.isMinusMeanEmgData = kwargs['kwargs'].get('isMinusMeanEmgData', False)
+        self.segment = kwargs['kwargs'].get("segment", 0)
 
-    ## 数据截切
     def DataCut(self, ):
+        '''数据截切
+            
+        '''
         self.emg, self.imu = cut_data(self.emg, self.imu)
     
-    ## 数据拉伸
     def DataStretch(self, ):
+        '''数据拉伸
+            
+        '''
         self.emg, self.imu = stretch(self.emg, self.imu, self.data_time)
 
-    ## 数据填充
     def DataFill(self, emg_value = 0,  imu_value = 0):
+        '''数据填充
+            
+        '''
         emg_line_len = self.data_time * 200
         imu_line_len = self.data_time * 50
         emg_count, imu_count = len(self.emg), len(self.imu)
@@ -57,20 +65,83 @@ class DataPreprocessing():
         else:
             self.imu = np.array(self.imu[0:imu_line_len])
 
-    ## 增加肌电流维数
+    def DataSegment(self, ):
+        '''数据分割
+            
+        '''
+        if (len(self.emg) % self.segment != 0) or (len(self.imu) % self.segment != 0):
+            print(len(self.emg) / self.segment)
+            raise InterruptedError("the len / segment must be int!")
+        else:
+            self.emg = self.emg.reshape(self.segment, int(self.emg.shape[0] / self.segment), -1)
+            self.imu = self.imu.reshape(self.segment, int(self.imu.shape[0] / self.segment), -1)
+    
+    # ## 数据归整
+    # def DataNorm(self, ):
+    #     self.emg = 
+
+    def DataFilter(self, ):
+        '''对EMG和IMU数据进行滤波操作
+
+            args：
+                Filter_args:
+                    EmgCategory：EMG信号的滤波形式，lowpass[低通滤波]，highpass[高通滤波]，bandpass[带通滤波]，bandtop[带阻滤波]
+                    EmgWn：选择EMG信号滤波的阈值
+                    EmgOrder：EMG信号滤波阶数
+                    ImuCategory：IMU信号的滤波形式，lowpass[低通滤波]，highpass[高通滤波]，bandpass[带通滤波]，bandtop[带阻滤波]
+                    ImuWn：选择IMU信号滤波的阈值
+                    ImuOrder：IMU信号滤波阶数
+        '''
+        self.emg = butter_filter(self.emg, category = self.Filter_args['EmgCategory'], wn=self.Filter_args['EmgWn'], order = self.Filter_args['EmgOrder'])
+        self.imu = butter_filter(self.imu, category = self.Filter_args['ImuCategory'], wn=self.Filter_args['ImuWn'], order = self.Filter_args['ImuOrder'])
+
+    def GetEmgFrequency(self, ):
+        '''获得肌电流频域信息
+           可以使用快速傅里叶变换或者小波变换
+        '''
+
+
+        pass
+
+
+
     def IncreaseEmgDim(self, ):
+        '''增加肌电流维数
+            
+        '''
         Add_Data = self.emg.copy()
         for i in range(len(self.emg[0])-1):
             for j in range(i+1, len(self.emg[0])):
                 Add_Data = np.hstack([Add_Data, np.abs(self.emg[:,i] - self.emg[:,j]).reshape(len(self.emg),1)])
         return Add_Data
 
-    ## 肌电流维度矫正
     def CorrectEmgData(self, ):
+        '''肌电流维度矫正
+            
+        '''
         self.emg = correct(self.emg)
 
-    ## 数据处理
+    def MinusMeanEmgData(self, ):
+        '''肌电流数据去除设备噪音：每一维度减去均值
+
+        '''
+        self.emg = self.emg - np.mean(self.emg, axis=0)
+
     def DataPreprocessse(self, emg, imu):
+        '''数据处理
+
+            args:
+                isCut: 决定数据是否需要裁切
+                isStretch: 决定数据是否需要拉伸
+                data_time: 拉伸到data_time时间长度
+                isFill: 决定数据是否需要填补
+                isIncreEmgDim: 决定EMG数据是否需要扩充维度
+                isMinusMeanEmgData：决定EMG数据每一维是否减去均值
+                segment：数据裁剪个数
+
+            return:
+                EmgData, ImuData --> numpy
+        '''
         self.emg, self.imu = emg, imu
         if (not self.emg) or (not self.imu):
             raise ValueError("数据不能为空")
@@ -80,8 +151,12 @@ class DataPreprocessing():
             self.DataStretch()
         if self.isFill:
             self.DataFill()
+        if self.isMinusMeanEmgData:
+            self.MinusMeanEmgData()
         if self.isIncreEmgDim:
             self.emg = self.IncreaseEmgDim()
+        if self.segment:
+            self.DataSegment()
         
         return np.array(self.emg), np.array(self.imu)
 
@@ -154,30 +229,37 @@ class ExtractDataFeature():
         if ('TM_N' in EMGFeatureTypes) and ('N' not in EMGFeatureKwargs):
             raise KeyError("The EMGFeatureKwargs don't have \"N\" !")
         feature_list = []
-        feature = EMGDataFeature(self.emg)
         for EMGFeatureType in EMGFeatureTypes:
-            feature_list.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs))
+            Fea = []
+            for i in range(len(self.emg)):
+                feature = EMGDataFeature(self.emg[i])
+                Fea.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs))
+            feature_list.append(Fea)
         return tuple(feature_list)
 
     ## 提取imu信号特征
     def ImuFeature(self, ):
-        pitch, roll, yaw = data_change(self.imu)
         imu_Euler_angle = []
-        for i in range(len(pitch)):
-            feature = [0 for i in range(7)]
-            feature[0] = self.imu[i][0]
-            feature[1] = self.imu[i][1]
-            feature[2] = self.imu[i][2]
-            feature[3] = self.imu[i][3]
-            feature[4] = pitch[i]
-            feature[5] = roll[i]
-            feature[6] = yaw[i]
-            imu_Euler_angle.append(feature)
-        
+        for s in range(len(self.imu)):
+            pitch, roll, yaw = data_change(self.imu[s])
+            angle = []
+            for i in range(len(pitch)):
+                feature = [0 for i in range(7)]
+                feature[0] = self.imu[s][i][0]
+                feature[1] = self.imu[s][i][1]
+                feature[2] = self.imu[s][i][2]
+                feature[3] = self.imu[s][i][3]
+                feature[4] = pitch[i]
+                feature[5] = roll[i]
+                feature[6] = yaw[i]
+                angle.append(feature)
+            imu_Euler_angle.append(angle)
         return np.array(imu_Euler_angle)
     
-    ## 整合信号
     def getFeature(self, emg, imu):
+        '''整合信号
+
+        '''
         self.emg, self.imu = emg, imu
         if (not self.emg) or (not self.imu):
             raise ValueError("数据不能为空")
