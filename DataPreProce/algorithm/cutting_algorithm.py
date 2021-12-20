@@ -94,6 +94,8 @@ def stretch(emg_data,imu_data,data_time):
     :param imu_data:
     :return:
     '''
+    emg_data = list(emg_data)
+    imu_data = list(imu_data)  
     emg_len = data_time * 200   # 定义emg数据的长度
     imu_len = data_time * 50   # 定义imu数据的长度
     if len(emg_data) <= emg_len:
