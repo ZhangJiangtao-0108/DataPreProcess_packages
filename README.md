@@ -52,27 +52,33 @@ from DataPreProce import *
 ## Parameter Settings
 ### 1.Data processing and feature extraction parameter setting
 ```json
-kwargs = {
+ kwargs = {
     "kwargs_pre":{
                   "isCut":True,
                   "isStretch":True,
                   "data_time":4, 
                   "isFill":False,
-                  "isFilter":False,
+                  "isFilter":True,
                   "Filter_args":{
-                                "EmgCategory":'lowpass',
-                                "EmgWn":0.8,
-                                "EmgOrder":8,
-                                "ImuCategory":'lowpass',
-                                "ImuWn":0.8,
-                                "ImuOrder":8
+                                "methold":"wave",
+                                "butter_args":{
+                                                "EmgCategory":'lowpass',
+                                                "EmgWn":0.8,
+                                                "EmgOrder":8,
+                                                "ImuCategory":'lowpass',
+                                                "ImuWn":0.8,
+                                                "ImuOrder":8
+                                },
+                                "wave_args":{
+                                              "w":"db7"
+                                }
                   },
                   "isMinusMeanEmgData":True,
                   "isIncreEmgDim":False,
                   "segment":100
                    },
     "kwargs_feature":{
-                    "EMGFeatureType":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"],
+                    "EMGFeatureTypes":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"], 
                     "EMGFeatureKwargs":{
                                         "ZC_threshold":0,
                                         "MYOP_threshold":0,
@@ -95,6 +101,7 @@ kwargs = {
 | data_time | Determine the data stretch length |
 | isFill | Determine if the data needs to be filling |
 | isFilter | Determine if the data needs to be filted |
+| Filter_args | The parameter of filter, two filtering methods can be selected |
 | Filter_args | Determine if the data needs to be stretched |
 | isMinusMeanEmgData | Determine if the EMG data needs to be subtracted from the mean |
 | isIncreEmgDim | Determine whether the EMG data needs to be dimensioned |
@@ -131,31 +138,51 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
             "sentence_max_label":9,
             "DataPre_args":{
                         "kwargs_pre":{
-                                    "isCut":True,
-                                    "isStretch":True,
-                                    "data_time":4, 
-                                    "isFill":True,
-                                    "isMinusMeanEmgData":False,
-                                    "isIncreEmgDim":True,
-                                    "segment":100
-                                    },
-                        "kwargs_feature":{
-                                        "EMGFeatureTypes":["SSI"], 
-                                        "EMGFeatureKwargs":{
-                                                            "ZC_threshold":0,
-                                                            "MYOP_threshold":0,
-                                                            "WAMP_threshold":0,
-                                                            "SSC_threshold":0,
-                                                            "v":1,
-                                                            "MAVSLP_K":3,
-                                                            "MHW_K":1,
-                                                            "MTW_K":1,
-                                                            "N":2
-                                                            }
+                        "isCut":True,
+                        "isStretch":True,
+                        "data_time":4, 
+                        "isFill":False,
+                        "isFilter":True,
+                        "Filter_args":{
+                                        "methold":"wave",
+                                        "butter_args":{
+                                                        "EmgCategory":'lowpass',
+                                                        "EmgWn":0.8,
+                                                        "EmgOrder":8,
+                                                        "ImuCategory":'lowpass',
+                                                        "ImuWn":0.8,
+                                                        "ImuOrder":8
                                         },
+                                        "wave_args":{
+                                                    "w":"db7"
+                                        }
+                        },
+                        "isMinusMeanEmgData":True,
+                        "isIncreEmgDim":False,
+                        "segment":100
+                        },
+            "kwargs_feature":{
+                            "EMGFeatureTypes":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"], 
+                            "EMGFeatureKwargs":{
+                                                "ZC_threshold":0,
+                                                "MYOP_threshold":0,
+                                                "WAMP_threshold":0,
+                                                "SSC_threshold":0,
+                                                "v":1,
+                                                "MAVSLP_K":3,
+                                                "MHW_K":1,
+                                                "MTW_K":1,
+                                                "N":2
+                                                }
+                            },
                     }
     }
 ```
 ## References
-[1]. Feature reduction and selection for EMG signal classification
+[1] A. Phinyomark, P. Phukpattaranont, and C. Limsakul,“Feature reduction and selection for EMG signal classification,” Expert Syst. Appl., vol. 39, no. 8, pp. 7420–7431, 2012  
+[2] F. A. Mahdavi, S. A. Ahmad, M. H. Marhaban, and M.-R. Akhbarzadeh-T, “Surface Electromyography Feature Extraction Based on Wavelet Transform,” Int. J. Integr. Eng., vol. 4, no. 3, pp. 1–7, 2012  
+[3] E. Gokgoz and A. Subasi, “Comparison of decision tree algorithms for EMG signal classification using DWT,” Biomed. Signal Process. Control, vol. 18, pp. 138–144, 2015  
+[4] Burhan, N. ,  M. Kasno , and  R. Ghazali . "Feature extraction of surface electromyography (sEMG) and signal processing technique in wavelet transform: A review." 2016 IEEE International Conference on Automatic Control and Intelligent Systems (I2CACIS) IEEE, 2016.  
+[5]I. Elamvazuthi, G. A. Ling, K. A. R. K. Nurhanim, P. Vasant, and S. Parasuraman, “Surface electromyography (sEMG) feature extraction based on Daubechies wavelets,” Proc. 2013 IEEE 8th Conf. Ind. Electron. Appl. ICIEA 2013, pp. 1492– 1495, 2013.  
+
 
