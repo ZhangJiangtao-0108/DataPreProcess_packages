@@ -16,14 +16,20 @@ if __name__ == '__main__':
                   "isStretch":True,
                   "data_time":4, 
                   "isFill":False,
-                  "isFilter":False,
+                  "isFilter":True,
                   "Filter_args":{
-                                "EmgCategory":'lowpass',
-                                "EmgWn":0.8,
-                                "EmgOrder":8,
-                                "ImuCategory":'lowpass',
-                                "ImuWn":0.8,
-                                "ImuOrder":8
+                                "methold":"wave",
+                                "butter_args":{
+                                                "EmgCategory":'lowpass',
+                                                "EmgWn":0.8,
+                                                "EmgOrder":8,
+                                                "ImuCategory":'lowpass',
+                                                "ImuWn":0.8,
+                                                "ImuOrder":8
+                                },
+                                "wave_args":{
+                                              "w":"db7"
+                                }
                   },
                   "isMinusMeanEmgData":True,
                   "isIncreEmgDim":False,
