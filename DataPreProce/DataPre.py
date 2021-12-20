@@ -3,11 +3,12 @@
 '''
 import numpy as np
 import os
+from scipy.fftpack import fft,ifft
 from algorithm.cutting_algorithm import cut_data, stretch
 from algorithm.Attitude_Angle_solution import data_change
 from algorithm.emg_correct import correct
 from algorithm.emg_feature import EMGDataFeature
-from algorithm.Butter_filter import butter_filter
+from algorithm.Butter_filter import butter_filter, Wave_filter
 
 ## 数据预处理
 class DataPreprocessing():
@@ -85,25 +86,34 @@ class DataPreprocessing():
 
             args：
                 Filter_args:
-                    EmgCategory：EMG信号的滤波形式，lowpass[低通滤波]，highpass[高通滤波]，bandpass[带通滤波]，bandtop[带阻滤波]
-                    EmgWn：选择EMG信号滤波的阈值
-                    EmgOrder：EMG信号滤波阶数
-                    ImuCategory：IMU信号的滤波形式，lowpass[低通滤波]，highpass[高通滤波]，bandpass[带通滤波]，bandtop[带阻滤波]
-                    ImuWn：选择IMU信号滤波的阈值
-                    ImuOrder：IMU信号滤波阶数
+                    methold：滤波方式["butter", "wave"]
+                    butter_srgs:
+                        EmgCategory：EMG信号的滤波形式，lowpass[低通滤波]，highpass[高通滤波]，bandpass[带通滤波]，bandtop[带阻滤波]
+                        EmgWn：选择EMG信号滤波的阈值
+                        EmgOrder：EMG信号滤波阶数
+                        ImuCategory：IMU信号的滤波形式，lowpass[低通滤波]，highpass[高通滤波]，bandpass[带通滤波]，bandtop[带阻滤波]
+                        ImuWn：选择IMU信号滤波的阈值
+                        ImuOrder：IMU信号滤波阶数
+                    wave_args:
+                        w：选择的小波函数
         '''
-        self.emg = butter_filter(self.emg, category = self.Filter_args['EmgCategory'], wn=self.Filter_args['EmgWn'], order = self.Filter_args['EmgOrder'])
-        self.imu = butter_filter(self.imu, category = self.Filter_args['ImuCategory'], wn=self.Filter_args['ImuWn'], order = self.Filter_args['ImuOrder'])
+        if self.Filter_args['methold'] == "butter":
+            butter_args = self.Filter_args["butter_args"]
+            self.emg = butter_filter(self.emg, category = butter_args['EmgCategory'], Wn=butter_args['EmgWn'], order = butter_args['EmgOrder'])
+            self.imu = butter_filter(self.imu, category = butter_args['ImuCategory'], Wn=butter_args['ImuWn'], order = butter_args['ImuOrder'])
+        elif self.Filter_args['methold'] == "wave":
+            wave_args = self.Filter_args["wave_args"]
+            self.emg = Wave_filter(self.emg, wave_args['w'])
+            self.imu = Wave_filter(self.imu, wave_args['w'])
+        else:
+            raise KeyError("Please change Filter methold!")
 
     def GetEmgFrequency(self, ):
         '''获得肌电流频域信息
            可以使用快速傅里叶变换或者小波变换
         '''
-
-
-        pass
-
-
+        ## 使用快速傅里叶变换进项时域到频域的转换--->得到的频域信号是一个复数形式的数据
+        self.emg_F = fft(self.emg)
 
     def IncreaseEmgDim(self, ):
         '''增加肌电流维数
@@ -131,6 +141,7 @@ class DataPreprocessing():
         '''数据处理
 
             args:
+                isFilter：决定数据是否需要滤波
                 isCut: 决定数据是否需要裁切
                 isStretch: 决定数据是否需要拉伸
                 data_time: 拉伸到data_time时间长度
@@ -145,6 +156,8 @@ class DataPreprocessing():
         self.emg, self.imu = emg, imu
         if (not self.emg) or (not self.imu):
             raise ValueError("数据不能为空")
+        if self.isFilter:
+            self.DataFilter()
         if self.isCut:
             self.DataCut()
         if self.isStretch:
