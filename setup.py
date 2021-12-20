@@ -10,6 +10,7 @@ setup(
                 "DataPreProce.makedatasets",\
                 "DataPreProce.algorithm.Attitude_Angle_solution",\
                 "DataPreProce.algorithm.cutting_algorithm",\
+                "DataPreProce.algorithm.Butter_filter",\
                 "DataPreProce.algorithm.emg_correct",\
                 "DataPreProce.algorithm.emg_feature",\
                 "DataPreProce.test"],

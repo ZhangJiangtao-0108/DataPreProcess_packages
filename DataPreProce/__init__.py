@@ -10,5 +10,6 @@ __all__ = ["DataPre",\
             "tesy",\
             "algorithm.Attitude_Angle_solution",\
             "algorithm.cutting_algorithm",\
+            "algorithm.Butter_filter",\
             "algorithm.emg_correct",\
             "algorithm.emg_feature"]
