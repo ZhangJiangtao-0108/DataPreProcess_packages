@@ -102,10 +102,30 @@ from DataPreProce import *
 | isFill | Determine if the data needs to be filling |
 | isFilter | Determine if the data needs to be filted |
 | Filter_args | The parameter of filter, two filtering methods can be selected |
-| Filter_args | Determine if the data needs to be stretched |
 | isMinusMeanEmgData | Determine if the EMG data needs to be subtracted from the mean |
 | isIncreEmgDim | Determine whether the EMG data needs to be dimensioned |
 | segment | Number of data segments |
+##### Filter_args
+| Parameter | default| Describe |
+|-----------|--------|----------|
+| methold | butter | Selective filtering method, include butter and wave|
+| butter_args | None | Butterworth filter method parameters |
+| wave_args | | None | Wave filter method parameters|
+- butter_args  
+
+| Parameter | default| Describe |
+|-----------|--------|----------|
+| EmgCategory | lowpass | Filtering form of EMG signal |
+| EmgWn | 0.8 | Select the threshold of EMG signal filtering |
+| EmgOrder | 8 | Filtering order of EMG signal |
+| ImuCategory | lowpass | Filtering form of IMU signal |
+| ImuWn | 0.8 | Select the threshold of IMU signal filtering |
+| ImuOrder | 8 | Filtering order of IMU signal |
+- wave_args  
+
+| Parameter | default| Describe |
+|-----------|--------|----------|
+| w | db7 | The wavelet function |
 #### EMG data feature table
 | EMGFeatureTypes | parameter | describe |
 |-----------------|-----------|----------|
