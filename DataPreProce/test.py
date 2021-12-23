@@ -16,7 +16,7 @@ if __name__ == '__main__':
                   "isStretch":True,
                   "data_time":4, 
                   "isFill":False,
-                  "isFilter":True,
+                  "isFilter":False,
                   "Filter_args":{
                                 "methold":"wave",
                                 "butter_args":{
@@ -100,7 +100,7 @@ names = os.listdir(datapath)
 for name in names:
     filenames = os.listdir(datapath + name + '/emg/')
     ## 文件保存路径
-    save_path = r'D:/张江涛/实验/EMG_dtw/word/' + name + '/'
+    save_path = r'D:/张江涛/实验/EMG_dtw/word/cut_stretch_MinusMean/' + name + '/'
     for i, _ in zip(range(len(filenames)-1), tqdm(range(len(filenames) - 1))):
         for j in range(i+1, len(filenames)):
             ## 读取数据
@@ -114,15 +114,18 @@ for name in names:
             emg_feature2, imu_feature2 = dataFeatureExtrech.getFeature(emg2, imu2)
             emg_feature1 = np.array(emg_feature1)
             emg_feature2 = np.array(emg_feature2)
+            # print(emg_feature1.shape)
+            # print(emg_feature2.shape)
             ## 名称
             title = save_path + filenames[i].split('_')[1] + filenames[i].split('_')[2] + "vs" + filenames[j].split('_')[1] + filenames[j].split('_')[2] + '/'
             for k in range(len(emg_feature1)):
+                # print(k)
                 ## 创建文件夹
                 title_ = title + kwargs["kwargs_feature"]["EMGFeatureTypes"][k] + '/'
                 if not os.path.exists(title_):
                     os.makedirs(title_)
                 for dim in range(emg_feature1.shape[-1]):
-                    distance, path = dtw.warping_paths(emg_feature1[0,:,dim], emg_feature2[0,:,dim])
+                    distance, path = dtw.warping_paths(emg_feature1[k,:,dim], emg_feature2[k,:,dim])
                     path = dtw.warping_path(emg_feature1[k,:,dim], emg_feature2[k,:,dim])
                     dtwvis.plot_warping(emg_feature1[k,:,dim], emg_feature2[k,:,dim], path, filename=title_+ str(dim) + '-' + str(distance) + ".png")
 
