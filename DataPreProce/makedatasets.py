@@ -10,45 +10,71 @@ def MakeDataSets(kwargs):
     '''制作数据集
 
         args:
-            datasets_args:数据集参数
+            DataSets_kwargs:数据集参数
+                DataPath:数据路径
+                SaveDataPath:保存数据集路径
                 gesture_dic_path:手势字典的路径
                 label_scales_path:志愿者编号文件路径
                 sentence_max_label:label的长度
+            DataPre_kwargs:
+                kwargs_pre:
+                    isFilter：决定数据是否需要滤波
+                    isCut: 决定数据是否需要裁切
+                    isStretch: 决定数据是否需要拉伸
+                    data_time: 拉伸到data_time时间长度
+                    isFill: 决定数据是否需要填补
+                    isIncreEmgDim: 决定EMG数据是否需要扩充维度
+                    isMinusMeanEmgData：决定EMG数据每一维是否减去均值
+                    segment：数据裁剪个数
+                kwargs_feature:
+                    EMGFeatureType: 提取EMG数据的特征类型，包括：[IEMG, MAV, MAV1, MAV2, SSI, VAR, TM_N, RMS, V, LOG, WL, AAC, DASDV, ZC, MYOP, WAMP, SSC, MAVSLP, MHW, MTW, HIST, HIST, AR, CC]
+                    EMGFeatureKwargs: 对应EMG数据特征的参数
+                        ZC_threshold: ZC对应的阈值，默认值为0
+                        MYOP_threshold: MYOP对应的阈值，默认值为0
+                        WAMP_threshold: WAMP对应的阈值，默认值为0
+                        SSC_threshold: SSC对应的阈值，默认值为0
+                        K: MAVSLP的特征参数，EMG数据对应的分段数，默认值为3
+                        N: TM_N对应的阶数
+
     '''
     ## 设置数据集参数
-    # print(kwargs)
-    # datasets_args = kwargs['datasets_args']
-    DataPath = kwargs['DataPath']
+    DataSets_kwargs = kwargs["DataSets_kwargs"]
     ## 设置数据处理参数
-    dataPre_args = kwargs['DataPre_args']
+    DataPre_kwargs = kwargs["DataPre_kwargs"]
+    DataPath = kwargs['DataPath']
     ## 读取字典
-    gesture_dic_file = open(kwargs['gesture_dic_path'],'r')
+    gesture_dic_file = open(DataSets_kwargs['gesture_dic_path'],'r')
     gesture_dic = eval(gesture_dic_file.readline())
     gesture_dic_file.close()
     ## 读取志愿者编号
-    label_scales_file = open(kwargs['label_scales_path'],'r')
+    label_scales_file = open(DataSets_kwargs['label_scales_path'],'r')
     label_scales = eval(label_scales_file.readline())
     label_scales_file.close()
     ## 获取数据个数
     DataNum = len(os.listdir(DataPath + 'emg/'))
-    emg, imu, _, _ = next(dataGenerator(DataPath, dataPre_args))
+    emg, imu, _, _ = next(dataGenerator(DataPath, DataPre_kwargs))
     ## 创建dataSets文件
     if kwargs['SaveDataPath']:
         dataSetsPath = kwargs['SaveDataPath'] + 'datasets_feature_All.hdf5'
     else:
         dataSetsPath = kwargs['DataPath'] + 'datasets_feature_All.hdf5'
     datasets = h5py.File(dataSetsPath,'w')
-    emg_feature_value = datasets.create_dataset('emg_data',(DataNum,emg.shape[0],emg.shape[1]))
+    ## emg数据特征类型
+    emgFeatureTypes = DataPre_kwargs["kwargs_feature"]["EMGFeatureTypes"]
+    for i in len(emg):
+        featureShape = tuple((DataNum,)) + tuple(emg[i].shape)
+        datasets.create_dataset('emg_data_' + emgFeatureTypes[i], featureShape)
     imu_feature_value = datasets.create_dataset('imu_data',(DataNum,imu.shape[0],imu.shape[1]))
     label_value = datasets.create_dataset('labels',(DataNum,kwargs['sentence_max_label']))
     scale_value = datasets.create_dataset('scales',(DataNum,1))
     ## 数据迭代器
         ## 创建dataSets文件
-    emg, imu, _, _ = next(dataGenerator(DataPath, dataPre_args))
-    data = iter(dataGenerator(DataPath, dataPre_args))
+    emg, imu, _, _ = next(dataGenerator(DataPath, DataPre_kwargs))
+    data = iter(dataGenerator(DataPath, DataPre_kwargs))
     try:
         for (emg, imu, sentence_word, scale), i in zip(data, tqdm(range(DataNum))):
-            emg_feature_value[i] = emg
+            for j in range(len(emg)):
+                datasets["emg_data_" + emgFeatureTypes[j]][i] = emg[j] 
             imu_feature_value[i] = imu
             ## 生成label
             label = [gesture_dic[word] for word in sentence_word]
@@ -67,40 +93,58 @@ def MakeDataSets(kwargs):
 
 
 if __name__ == '__main__':
-
-    kwargs = {'datasets_args':{'gesture_dic_path':'C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/gesture_dic_all.txt',
-                               'label_scales_path':'C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/label_scales.txt',
-                               'sentence_max_label':9
-                              }
-
-    }
-    kwargs = {'DataPath':'C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/',
-                     'SaveDataPath':'C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/',
-                     'gesture_dic_path':'C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/gesture_dic_all.txt',
-                     'label_scales_path':'C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/label_scales.txt',
-                     'sentence_max_label':9,
-                     'DataPre_args':{
-                                    "kwargs_pre":{
-                                                "isCut":True,
-                                                "isStretch":True,
-                                                "data_time":4, 
-                                                "isFill":True,
-                                                "isIncreEmgDim":True
-                                                },
-                                    "kwargs_feature":{
-                                                    "EMGFeatureTypes":["SSI"], 
-                                                    "EMGFeatureKwargs":{
-                                                                        "ZC_threshold":0,
-                                                                        "MYOP_threshold":0,
-                                                                        "WAMP_threshold":0,
-                                                                        "SSC_threshold":0,
-                                                                        "v":1,
-                                                                        "MAVSLP_K":3,
-                                                                        "MHW_K":1,
-                                                                        "MTW_K":1,
-                                                                        "N":2
-                                                                        }
-                                                    },
+    kwargs = {
+        "DataSets_kwargs": {
+                            'datasets_args':{
+                                            "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
+                                            "SaveDataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
+                                            'gesture_dic_path':'C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/gesture_dic_all.txt',
+                                            'label_scales_path':'C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/label_scales.txt',
+                                            'sentence_max_label':9
                                 }
-    }
+
+        },
+        "DataPre_kwargs" : {  
+                            "kwargs_pre":{
+                                        "kwargs_pre":{
+                                        "isCut":True,
+                                        "isStretch":True,
+                                        "data_time":4, 
+                                        "isFill":False,
+                                        "isFilter":True,
+                                        "Filter_args":{
+                                                        "methold":"wave",
+                                                        "butter_args":{
+                                                                        "EmgCategory":'lowpass',
+                                                                        "EmgWn":0.8,
+                                                                        "EmgOrder":8,
+                                                                        "ImuCategory":'lowpass',
+                                                                        "ImuWn":0.8,
+                                                                        "ImuOrder":8
+                                                        },
+                                                        "wave_args":{
+                                                                    "w":"db7"
+                                                        }
+                                        },
+                                        "isMinusMeanEmgData":True,
+                                        "isIncreEmgDim":False,
+                                        "segment":100
+                                        },
+                                "kwargs_feature":{
+                                        "EMGFeatureTypes":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"], 
+                                        "EMGFeatureKwargs":{
+                                                            "ZC_threshold":0,
+                                                            "MYOP_threshold":0,
+                                                            "WAMP_threshold":0,
+                                                            "SSC_threshold":0,
+                                                            "v":1,
+                                                            "MAVSLP_K":3,
+                                                            "MHW_K":1,
+                                                            "MTW_K":1,
+                                                            "N":2
+                                                            }
+                                        },
+                            }
+            }
+        }
     MakeDataSets(kwargs)
