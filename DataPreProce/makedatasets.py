@@ -3,6 +3,7 @@
 '''
 from tqdm import tqdm
 import h5py
+import numpy as np
 import os
 from DataPre import dataGenerator
 
@@ -41,97 +42,106 @@ def MakeDataSets(kwargs):
     DataSets_kwargs = kwargs["DataSets_kwargs"]
     ## 设置数据处理参数
     DataPre_kwargs = kwargs["DataPre_kwargs"]
-    DataPath = kwargs['DataPath']
+    # print(DataPre_kwargs)
+    DataPath = DataSets_kwargs['DataPath']
     ## 读取字典
-    gesture_dic_file = open(DataSets_kwargs['gesture_dic_path'],'r')
+    gesture_dic_file = open(DataSets_kwargs['gesture_dic_path'],'r',encoding='gbk')
     gesture_dic = eval(gesture_dic_file.readline())
     gesture_dic_file.close()
     ## 读取志愿者编号
-    label_scales_file = open(DataSets_kwargs['label_scales_path'],'r')
+    label_scales_file = open(DataSets_kwargs['label_scales_path'],'r',encoding='gbk')
     label_scales = eval(label_scales_file.readline())
     label_scales_file.close()
     ## 获取数据个数
-    DataNum = len(os.listdir(DataPath + 'emg/'))
-    emg, imu, _, _ = next(dataGenerator(DataPath, DataPre_kwargs))
+    filenames = os.listdir(DataPath + 'emg/')
+    DataNum = len(filenames)
+    # print(DataPre_kwargs)
+    emg, imu, _, _ = next(dataGenerator(DataPath, kwargs = DataPre_kwargs))
     ## 创建dataSets文件
-    if kwargs['SaveDataPath']:
-        dataSetsPath = kwargs['SaveDataPath'] + 'datasets_feature_All.hdf5'
-    else:
-        dataSetsPath = kwargs['DataPath'] + 'datasets_feature_All.hdf5'
+    dataSetsPath = DataSets_kwargs['SaveDataPath'] + 'datasets_feature_All.hdf5'  
     datasets = h5py.File(dataSetsPath,'w')
     ## emg数据特征类型
     emgFeatureTypes = DataPre_kwargs["kwargs_feature"]["EMGFeatureTypes"]
-    for i in len(emg):
-        featureShape = tuple((DataNum,)) + tuple(emg[i].shape)
+    for i in range(len(emg)):
+        featureShape = tuple((DataNum,)) + tuple(emg[i].shape) #+ tuple((8,))
+        # print(featureShape)
         datasets.create_dataset('emg_data_' + emgFeatureTypes[i], featureShape)
-    imu_feature_value = datasets.create_dataset('imu_data',(DataNum,imu.shape[0],imu.shape[1]))
-    label_value = datasets.create_dataset('labels',(DataNum,kwargs['sentence_max_label']))
+    imu_feature_value = datasets.create_dataset('imu_data',(DataNum,imu.shape[0],imu.shape[1],imu.shape[2]))
+    label_value = datasets.create_dataset('labels',(DataNum,DataSets_kwargs['sentence_max_label']))
     scale_value = datasets.create_dataset('scales',(DataNum,1))
     ## 数据迭代器
         ## 创建dataSets文件
-    emg, imu, _, _ = next(dataGenerator(DataPath, DataPre_kwargs))
-    data = iter(dataGenerator(DataPath, DataPre_kwargs))
+    emg, imu, _, _ = next(dataGenerator(DataPath, kwargs = DataPre_kwargs))
+    data = iter(dataGenerator(DataPath, kwargs = DataPre_kwargs))
     try:
         for (emg, imu, sentence_word, scale), i in zip(data, tqdm(range(DataNum))):
             for j in range(len(emg)):
-                datasets["emg_data_" + emgFeatureTypes[j]][i] = emg[j] 
+                # print(type(emg[j]))
+                # print(datasets["emg_data_"+emgFeatureTypes[j]][i].shape)
+                emg_feature_value = datasets["emg_data_"+emgFeatureTypes[j]]
+                # datasets["emg_data_"+emgFeatureTypes[j]][i] = emg[j] 
+                # print(list(emg[j]))
+                emg_feature_value[i] = list(emg[j])
             imu_feature_value[i] = imu
             ## 生成label
             label = [gesture_dic[word] for word in sentence_word]
-            if len(label) < kwargs['sentence_max_label']:
+            if len(label) < DataSets_kwargs['sentence_max_label']:
                 label.insert(0,gesture_dic['sos'])
                 # label.insert(len(label), gesture_dic['eos'])
-                if len(label) < kwargs['sentence_max_label']:
-                    for i in range(len(label),kwargs['sentence_max_label']):
-                        label.insert(i,gesture_dic['pos'])
-            
+                if len(label) < DataSets_kwargs['sentence_max_label']:
+                    for k in range(len(label),DataSets_kwargs['sentence_max_label']):
+                        label.insert(k,gesture_dic['pos'])
+            print(filenames[i])
+            print(label)
             label_value[i] = label
             scale_value[i] = label_scales[scale]
     except StopIteration:
         pass
     datasets.close()
 
+def ReadDataSets(kwargs):
+    dataSetsPath = kwargs["DataSets_kwargs"]["SaveDataPath"] + 'datasets_feature_All.hdf5' 
+    datasets = h5py.File(dataSetsPath,'r')
+    # print(datasets["emg_data_IEMG"][1])
+    print(datasets["labels"][1:6])
+    datasets.close()
 
 if __name__ == '__main__':
     kwargs = {
         "DataSets_kwargs": {
-                            'datasets_args':{
-                                            "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
-                                            "SaveDataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
-                                            'gesture_dic_path':'C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/gesture_dic_all.txt',
-                                            'label_scales_path':'C:/Users/张江涛/Desktop/新建文件夹/gesture_sentence_recognition/config/label_scales.txt',
-                                            'sentence_max_label':9
-                                }
-
-        },
+                            "DataPath":"/home/w/数据/zjt/sentence_data/sentence_data_train/",
+                            "SaveDataPath":"/home/zjt/zhangjiangtao/sentence_data/",
+                            'gesture_dic_path':'/home/zjt/zhangjiangtao/sentence_data/gesture_dic_all.txt',
+                            'label_scales_path':'/home/zjt/zhangjiangtao/sentence_data/label_scales.txt',
+                            'sentence_max_label':9
+                            },
         "DataPre_kwargs" : {  
                             "kwargs_pre":{
-                                        "kwargs_pre":{
-                                        "isCut":True,
-                                        "isStretch":True,
-                                        "data_time":4, 
-                                        "isFill":False,
-                                        "isFilter":True,
-                                        "Filter_args":{
-                                                        "methold":"wave",
-                                                        "butter_args":{
-                                                                        "EmgCategory":'lowpass',
-                                                                        "EmgWn":0.8,
-                                                                        "EmgOrder":8,
-                                                                        "ImuCategory":'lowpass',
-                                                                        "ImuWn":0.8,
-                                                                        "ImuOrder":8
-                                                        },
-                                                        "wave_args":{
-                                                                    "w":"db7"
-                                                        }
-                                        },
-                                        "isMinusMeanEmgData":True,
-                                        "isIncreEmgDim":False,
-                                        "segment":100
-                                        },
+                                    "isCut":True,
+                                    "isStretch":True,
+                                    "data_time":4, 
+                                    "isFill":False,
+                                    "isFilter":True,
+                                    "Filter_args":{
+                                                    "methold":"wave",
+                                                    "butter_args":{
+                                                                    "EmgCategory":'lowpass',
+                                                                    "EmgWn":0.8,
+                                                                    "EmgOrder":8,
+                                                                    "ImuCategory":'lowpass',
+                                                                    "ImuWn":0.8,
+                                                                    "ImuOrder":8
+                                                    },
+                                                    "wave_args":{
+                                                                "w":"db7"
+                                                    }
+                                    },
+                                    "isMinusMeanEmgData":True,
+                                    "isIncreEmgDim":False,
+                                    "segment":100
+                                    },
                                 "kwargs_feature":{
-                                        "EMGFeatureTypes":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"], 
+                                        "EMGFeatureTypes":["IEMG","MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MHW", "MTW",], 
                                         "EMGFeatureKwargs":{
                                                             "ZC_threshold":0,
                                                             "MYOP_threshold":0,
@@ -143,8 +153,8 @@ if __name__ == '__main__':
                                                             "MTW_K":1,
                                                             "N":2
                                                             }
-                                        },
-                            }
+                            },
+                                }
             }
-        }
-    MakeDataSets(kwargs)
+    # MakeDataSets(kwargs)
+    ReadDataSets(kwargs)
