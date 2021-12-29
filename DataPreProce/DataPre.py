@@ -198,6 +198,7 @@ class ExtractDataFeature():
         '''
         self.emg, self.imu = None, None
         kwargs = kwargs['kwargs']
+        # print(kwargs)
         self.kwargs_pre = kwargs['kwargs_pre']
         self.kwargs_feature = kwargs['kwargs_feature']  
         self.dataPre = DataPreprocessing(kwargs = self.kwargs_pre)
@@ -308,6 +309,10 @@ def ReadData(dataPath):
         emgFile.close()
         imuFile.close()
         ## 生成label
+        fuhao = ',\!?。，？！、 '
+        for x in fuhao:
+            if x in emgDataName:
+                emgDataName = emgDataName.replace(x,'')
         label = emgDataName.split('_')[0].split('-')
         ## 生成志愿者
         scale = emgDataName.split('_')[1]
