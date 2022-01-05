@@ -8,7 +8,7 @@ import os
 from DataPre import dataGenerator
 
 def MakeDataSets(kwargs):
-    '''制作数据集
+    """制作数据集
 
         args:
             DataSets_kwargs:数据集参数
@@ -37,7 +37,7 @@ def MakeDataSets(kwargs):
                         K: MAVSLP的特征参数，EMG数据对应的分段数，默认值为3
                         N: TM_N对应的阶数
 
-    '''
+    """
     ## 设置数据集参数
     DataSets_kwargs = kwargs["DataSets_kwargs"]
     ## 设置数据处理参数
@@ -99,11 +99,18 @@ def MakeDataSets(kwargs):
         pass
     datasets.close()
 
-def ReadDataSets(kwargs):
-    dataSetsPath = kwargs["DataSets_kwargs"]["SaveDataPath"] + 'datasets_feature_All.hdf5' 
-    datasets = h5py.File(dataSetsPath,'r')
-    # print(datasets["emg_data_IEMG"][1])
-    print(datasets["labels"][1:6])
+def ReadDataSets(**kwargs):
+    """
+        读取特征数据
+
+        args:
+            dataSetsPath:数据集的路径
+            EMGFeatureTypes:选择的emg数据的特征
+            IMUFeatureTypes:
+
+
+    """
+    datasets = h5py.File(kwargs["dataSetsPath"],'r')
     datasets.close()
 
 if __name__ == '__main__':
