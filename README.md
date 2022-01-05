@@ -75,7 +75,8 @@ from DataPreProce import *
                   },
                   "isMinusMeanEmgData":True,
                   "isIncreEmgDim":False,
-                  "segment":100
+                  "segment":100,
+                  "emgChannel":[]
                    },
     "kwargs_feature":{
                     "EMGFeatureTypes":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"], 
@@ -105,6 +106,7 @@ from DataPreProce import *
 | isMinusMeanEmgData | Determine if the EMG data needs to be subtracted from the mean |
 | isIncreEmgDim | Determine whether the EMG data needs to be dimensioned |
 | segment | Number of data segments |
+| emgChannel | Select the EMG data channel |
 ##### Filter_args
 | Parameter | default| Describe |
 |-----------|--------|----------|
@@ -179,7 +181,8 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
                         },
                         "isMinusMeanEmgData":True,
                         "isIncreEmgDim":False,
-                        "segment":100
+                        "segment":100,
+                        "emgChannel":[]
                         },
             "kwargs_feature":{
                             "EMGFeatureTypes":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"], 

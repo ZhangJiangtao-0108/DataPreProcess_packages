@@ -33,6 +33,7 @@ class DataPreprocessing():
         self.isIncreEmgDim = kwargs['kwargs'].get('isIncreEmgDim', False)
         self.isMinusMeanEmgData = kwargs['kwargs'].get('isMinusMeanEmgData', False)
         self.segment = kwargs['kwargs'].get("segment", 0)
+        self.emgChannel = kwargs['kwargs'].get("emgChannel", None)
 
     def DataCut(self, ):
         '''数据截切
@@ -45,6 +46,7 @@ class DataPreprocessing():
             
         '''
         self.emg, self.imu = stretch(self.emg, self.imu, self.data_time)
+    
 
     def DataFill(self, emg_value = 0,  imu_value = 0):
         '''数据填充
@@ -124,6 +126,15 @@ class DataPreprocessing():
             for j in range(i+1, len(self.emg[0])):
                 Add_Data = np.hstack([Add_Data, np.abs(self.emg[:,i] - self.emg[:,j]).reshape(len(self.emg),1)])
         return Add_Data
+    
+    def SelectEmgChannel(self, ):
+        """选择肌电流数据的通道
+        
+        """
+        if self.Channel:
+            self.emg = self.emg[:, self.emgChannel]
+        else:
+            pass
 
     def CorrectEmgData(self, ):
         '''肌电流维度矫正
@@ -166,6 +177,7 @@ class DataPreprocessing():
             self.DataFill()
         if self.isMinusMeanEmgData:
             self.MinusMeanEmgData()
+        self.SelectEmgChannel()
         if self.isIncreEmgDim:
             self.emg = self.IncreaseEmgDim()
         if self.segment:
