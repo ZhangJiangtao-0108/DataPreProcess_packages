@@ -19,6 +19,8 @@ class DataPreprocessing():
                 emg: EMG数据
                 imu: IMU数据
                 emg_F：EMG数据的频域处理信息
+                segment:决定数据的裁剪段数
+                emgChannel：选择emg数据的通道
         '''
         self.emg = None
         self.imu = None
@@ -50,7 +52,10 @@ class DataPreprocessing():
 
     def DataFill(self, emg_value = 0,  imu_value = 0):
         '''数据填充
-            
+
+           args:
+                emg_value:emg数据的填充值
+                imu_value:imu数据的填充值
         '''
         emg_line_len = self.data_time * 200
         imu_line_len = self.data_time * 50
@@ -131,7 +136,7 @@ class DataPreprocessing():
         """选择肌电流数据的通道
         
         """
-        if self.Channel:
+        if self.emgChannel:
             self.emg = self.emg[:, self.emgChannel]
         else:
             pass
@@ -148,7 +153,7 @@ class DataPreprocessing():
         '''
         self.emg = self.emg - np.mean(self.emg, axis=0)
 
-    def DataPreprocessse(self, emg, imu):
+    def DataPreprocess(self, emg, imu):
         '''数据处理
 
             args:
@@ -290,7 +295,7 @@ class ExtractDataFeature():
         if (not self.emg) or (not self.imu):
             raise ValueError("数据不能为空")
         ## 数据预处理
-        self.emg, self.imu = self.dataPre.DataPreprocessse(self.emg, self.imu)
+        self.emg, self.imu = self.dataPre.DataPreprocess(self.emg, self.imu)
         ## 特征提取
         emgFeature = self.EmgFeature()
         imuFeature = self.ImuFeature()
@@ -332,6 +337,18 @@ def ReadData(dataPath):
 
 ## 数据处理生成器
 def dataGenerator(dataPath, kwargs):
+    data = ReadData(dataPath)
+    dataPreproce = DataPreprocessing(kwargs = kwargs)
+    while True:
+        try:
+            emg, imu, label, scale = next(data)
+            emgPre, imuPre = dataPreproce.DataPreprocess(emg, imu)
+            yield np.array(emgPre), np.array(imuPre), label, scale
+        except StopIteration:
+            return
+
+## 数据特征生成器
+def dataFeature(dataPath, kwargs):
     data = ReadData(dataPath)
     dataFeatureExtract = ExtractDataFeature(kwargs = kwargs)
     while True:
