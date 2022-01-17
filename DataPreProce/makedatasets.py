@@ -5,9 +5,10 @@ from tqdm import tqdm
 import h5py
 import numpy as np
 import os
-from DataPre import dataGenerator
+from DataPre import dataGenerator, ReadData, dataFeature
 
-def MakeDataSets(kwargs):
+
+def MakeDataFeatureSets(kwargs):
     """制作数据集
 
         args:
@@ -42,7 +43,7 @@ def MakeDataSets(kwargs):
     DataSets_kwargs = kwargs["DataSets_kwargs"]
     ## 设置数据处理参数
     DataPre_kwargs = kwargs["DataPre_kwargs"]
-    # print(DataPre_kwargs)
+    ## 设置数据保存路径
     DataPath = DataSets_kwargs['DataPath']
     ## 读取字典
     gesture_dic_file = open(DataSets_kwargs['gesture_dic_path'],'r',encoding='gbk')
@@ -56,7 +57,7 @@ def MakeDataSets(kwargs):
     filenames = os.listdir(DataPath + 'emg/')
     DataNum = len(filenames)
     # print(DataPre_kwargs)
-    emg, imu, _, _ = next(dataGenerator(DataPath, kwargs = DataPre_kwargs))
+    emg, imu, _, _ = next(dataFeature(DataPath, kwargs = DataPre_kwargs))
     ## 创建dataSets文件
     dataSetsPath = DataSets_kwargs['SaveDataPath'] + 'datasets_feature_All.hdf5'  
     datasets = h5py.File(dataSetsPath,'w')
@@ -64,15 +65,13 @@ def MakeDataSets(kwargs):
     emgFeatureTypes = DataPre_kwargs["kwargs_feature"]["EMGFeatureTypes"]
     for i in range(len(emg)):
         featureShape = tuple((DataNum,)) + tuple(emg[i].shape) #+ tuple((8,))
-        # print(featureShape)
         datasets.create_dataset('emg_data_' + emgFeatureTypes[i], featureShape)
     imu_feature_value = datasets.create_dataset('imu_data',(DataNum,imu.shape[0],imu.shape[1],imu.shape[2]))
     label_value = datasets.create_dataset('labels',(DataNum,DataSets_kwargs['sentence_max_label']))
     scale_value = datasets.create_dataset('scales',(DataNum,1))
     ## 数据迭代器
-        ## 创建dataSets文件
-    emg, imu, _, _ = next(dataGenerator(DataPath, kwargs = DataPre_kwargs))
-    data = iter(dataGenerator(DataPath, kwargs = DataPre_kwargs))
+    emg, imu, _, _ = next(dataFeature(DataPath, kwargs = DataPre_kwargs))
+    data = iter(dataFeature(DataPath, kwargs = DataPre_kwargs))
     try:
         for (emg, imu, sentence_word, scale), i in zip(data, tqdm(range(DataNum))):
             for j in range(len(emg)):
@@ -91,8 +90,6 @@ def MakeDataSets(kwargs):
                 if len(label) < DataSets_kwargs['sentence_max_label']:
                     for k in range(len(label),DataSets_kwargs['sentence_max_label']):
                         label.insert(k,gesture_dic['pos'])
-            print(filenames[i])
-            print(label)
             label_value[i] = label
             scale_value[i] = label_scales[scale]
     except StopIteration:
@@ -113,7 +110,75 @@ def ReadDataSets(**kwargs):
     datasets = h5py.File(kwargs["dataSetsPath"],'r')
     datasets.close()
 
+def MakeDataRawSets(kwargs):
+    """制作数据集
+
+        args:
+            DataSets_kwargs:数据集参数
+                DataPath:数据路径
+                SaveDataPath:保存数据集路径
+                gesture_dic_path:手势字典的路径
+                label_scales_path:志愿者编号文件路径
+                sentence_max_label:label的长度
+            DataPre_kwargs:
+                kwargs_pre:
+                    isFilter：决定数据是否需要滤波
+                    isCut: 决定数据是否需要裁切
+                    isStretch: 决定数据是否需要拉伸
+                    data_time: 拉伸到data_time时间长度
+                    isFill: 决定数据是否需要填补
+                    isIncreEmgDim: 决定EMG数据是否需要扩充维度
+                    isMinusMeanEmgData：决定EMG数据每一维是否减去均值
+                    segment：数据裁剪个数
+
+    """
+    ## 设置数据集参数
+    DataSets_kwargs = kwargs["DataSets_kwargs"]
+    ## 设置数据处理参数
+    DataPre_kwargs = kwargs["DataPre_kwargs"]["kwargs_pre"]
+    ## 设置数据保存路径
+    DataPath = DataSets_kwargs['DataPath']
+    ## 读取字典
+    gesture_dic_file = open(DataSets_kwargs['gesture_dic_path'],'r',encoding='gbk')
+    gesture_dic = eval(gesture_dic_file.readline())
+    gesture_dic_file.close()
+    ## 读取志愿者编号
+    label_scales_file = open(DataSets_kwargs['label_scales_path'],'r',encoding='gbk')
+    label_scales = eval(label_scales_file.readline())
+    label_scales_file.close()
+    ## 获取数据个数
+    filenames = os.listdir(DataPath + 'emg/')
+    DataNum = len(filenames)
+    emg, imu, _, _ = next(dataGenerator(DataPath, kwargs = DataPre_kwargs))
+    ## 创建dataSets文件
+    dataSetsPath = DataSets_kwargs['SaveDataPath'] + 'datasets_Raw_All.hdf5'  
+    datasets = h5py.File(dataSetsPath,'w')
+    emg_pre_value = datasets.create_dataset('emg_data',(DataNum,emg.shape[0],emg.shape[1]))
+    imu_pre_value = datasets.create_dataset('imu_data',(DataNum,imu.shape[0],imu.shape[1]))
+    label_value = datasets.create_dataset('labels',(DataNum,DataSets_kwargs['sentence_max_label']))
+    scale_value = datasets.create_dataset('scales',(DataNum,1))
+    ## 数据迭代器
+    data = iter(dataGenerator(DataPath, kwargs = DataPre_kwargs))
+    try:
+        for (emg, imu, sentence_word, scale), i in zip(data, tqdm(range(DataNum))):
+            emg_pre_value[i] = emg
+            imu_pre_value[i] = imu
+            ## 生成label
+            label = [gesture_dic[word] for word in sentence_word]
+            if len(label) < DataSets_kwargs['sentence_max_label']:
+                label.insert(0,gesture_dic['sos'])
+                # label.insert(len(label), gesture_dic['eos'])
+                if len(label) < DataSets_kwargs['sentence_max_label']:
+                    for k in range(len(label),DataSets_kwargs['sentence_max_label']):
+                        label.insert(k,gesture_dic['pos'])
+            label_value[i] = label
+            scale_value[i] = label_scales[scale]
+    except StopIteration:
+        pass
+    datasets.close()
+
 if __name__ == '__main__':
+    '''
     kwargs = {
         "DataSets_kwargs": {
                             "DataPath":"/home/w/数据/zjt/sentence_data/sentence_data_train/",
@@ -163,5 +228,41 @@ if __name__ == '__main__':
                             },
                                 }
             }
-    # MakeDataSets(kwargs)
-    ReadDataSets(kwargs)
+    '''
+    kwargs = {
+        "DataSets_kwargs": {
+                            "DataPath":"/home/w/数据/zjt/sentence_data/sentence_data_train/",
+                            "SaveDataPath":"/home/zjt/zhangjiangtao/sentence_data/",
+                            'gesture_dic_path':'/home/zjt/zhangjiangtao/sentence_data/gesture_dic_all.txt',
+                            'label_scales_path':'/home/zjt/zhangjiangtao/sentence_data/label_scales.txt',
+                            'sentence_max_label':9
+                            },
+        "DataPre_kwargs" : {  
+                            "kwargs_pre":{
+                                    "isCut":True,
+                                    "isStretch":False,
+                                    "data_time":4, 
+                                    "isFill":True,
+                                    "isFilter":True,
+                                    "Filter_args":{
+                                                    "methold":"wave",
+                                                    "butter_args":{
+                                                                    "EmgCategory":'lowpass',
+                                                                    "EmgWn":0.8,
+                                                                    "EmgOrder":8,
+                                                                    "ImuCategory":'lowpass',
+                                                                    "ImuWn":0.8,
+                                                                    "ImuOrder":8
+                                                    },
+                                                    "wave_args":{
+                                                                "w":"db7"
+                                                    }
+                                    },
+                                    "isMinusMeanEmgData":True,
+                                    "isIncreEmgDim":False,
+                                    "segment":None
+                                    }
+        }
+        }
+    # MakeDataFeatureSets(kwargs)
+    MakeDataRawSets(kwargs)
