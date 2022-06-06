@@ -9,6 +9,7 @@ from algorithm.Attitude_Angle_solution import data_change
 from algorithm.emg_correct import correct
 from algorithm.emg_feature import EMGDataFeature
 from algorithm.Butter_filter import butter_filter, Wave_filter
+from algorithm.Data_Complement import Data_Complement
 
 ## 数据预处理
 class DataPreprocessing():
@@ -61,17 +62,19 @@ class DataPreprocessing():
         imu_line_len = self.data_time * 50
         emg_count, imu_count = len(self.emg), len(self.imu)
         ## 处理emg数据
-        if emg_count < emg_line_len:
-            emg_add = np.array([[emg_value for i in range(8)] for j in range(emg_line_len - emg_count)])
-            self.emg = np.vstack([np.array(self.emg), emg_add])
-        else:
-            self.emg = np.array(self.emg[0:emg_line_len])
+        self.emg = Data_Complement(self.emg, emg_line_len)
+        # if emg_count < emg_line_len:
+        #     emg_add = np.array([[emg_value for i in range(8)] for j in range(emg_line_len - emg_count)])
+        #     self.emg = np.vstack([np.array(self.emg), emg_add])
+        # else:
+        #     self.emg = np.array(self.emg[0:emg_line_len])
         ## 处理imu数据
-        if imu_count < imu_line_len:
-            imu_add = np.array([[imu_value for i in range(10)] for j in range(imu_line_len - imu_count)])
-            self.imu = np.vstack([np.array(self.imu), imu_add])
-        else:
-            self.imu = np.array(self.imu[0:imu_line_len])
+        self.imu = Data_Complement(self.imu, imu_line_len)
+        # if imu_count < imu_line_len:
+        #     imu_add = np.array([[imu_value for i in range(10)] for j in range(imu_line_len - imu_count)])
+        #     self.imu = np.vstack([np.array(self.imu), imu_add])
+        # else:
+        #     self.imu = np.array(self.imu[0:imu_line_len])
 
     def DataSegment(self, ):
         '''数据分割

@@ -201,6 +201,10 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
                     }
     }
 ```
+## Other Algorithm
+| Algorithm | parameter | describe |
+|-----------------|-----------|----------|
+|Laplace|||
 ## References
 [1] A. Phinyomark, P. Phukpattaranont, and C. Limsakul,“Feature reduction and selection for EMG signal classification,” Expert Syst. Appl., vol. 39, no. 8, pp. 7420–7431, 2012  
 [2] F. A. Mahdavi, S. A. Ahmad, M. H. Marhaban, and M.-R. Akhbarzadeh-T, “Surface Electromyography Feature Extraction Based on Wavelet Transform,” Int. J. Integr. Eng., vol. 4, no. 3, pp. 1–7, 2012  
