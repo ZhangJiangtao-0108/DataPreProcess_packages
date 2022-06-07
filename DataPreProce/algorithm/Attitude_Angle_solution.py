@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 ## 将加速度和角速度数据转变为欧拉角
 def data_change(imu_data):
@@ -90,7 +91,7 @@ def data_change(imu_data):
                 #打印姿态角信息以及把姿态角数据写到txt文本中
                 # print("pry:%.3f,%.3f,%.3f"%(pitch,roll,yaw))
                 
-        return pitch_, roll_, yaw_
+        return np.array(pitch_), np.array(roll_), np.array(yaw_)
         
 
 

@@ -4,6 +4,7 @@
 import numpy as np
 import os
 from scipy.fftpack import fft,ifft
+import sys
 from algorithm.cutting_algorithm import cut_data, stretch
 from algorithm.Attitude_Angle_solution import data_change
 from algorithm.emg_correct import correct
@@ -15,28 +16,28 @@ from algorithm.Data_Complement import Data_Complement
 class DataPreprocessing():
     def __init__(self, **kwargs) -> None:
         '''进行数据预处理
-
-            args:
-                emg: EMG数据
-                imu: IMU数据
-                emg_F：EMG数据的频域处理信息
-                segment:决定数据的裁剪段数
-                emgChannel：选择emg数据的通道
+            kwargs：
+                kwargs_pre：
+                    emg：EMG数据
+                    imu:：IMU数据
+                    emg_F：EMG数据的频域处理信息
+                    segment：决定数据的裁剪段数
+                    emgChannel：选择emg数据的通道
         '''
         self.emg = None
         self.imu = None
         self.emg_F = None
-        self.isCut = kwargs['kwargs'].get('isCut', False)
-        self.isStretch = kwargs['kwargs'].get('isStretch', False)
-        self.data_time = kwargs['kwargs'].get('data_time', 4)
-        self.isFill = kwargs['kwargs'].get('isFill', False)
-        self.isFilter = kwargs['kwargs'].get('isFilter', False)
+        self.isCut = kwargs['kwargs_pre'].get('isCut', False)
+        self.isStretch = kwargs['kwargs_pre'].get('isStretch', False)
+        self.data_time = kwargs['kwargs_pre'].get('data_time', 4)
+        self.isFill = kwargs['kwargs_pre'].get('isFill', False)
+        self.isFilter = kwargs['kwargs_pre'].get('isFilter', False)
         if self.isFilter:
-            self.Filter_args = kwargs['kwargs'].get('Filter_args')
-        self.isIncreEmgDim = kwargs['kwargs'].get('isIncreEmgDim', False)
-        self.isMinusMeanEmgData = kwargs['kwargs'].get('isMinusMeanEmgData', False)
-        self.segment = kwargs['kwargs'].get("segment", 0)
-        self.emgChannel = kwargs['kwargs'].get("emgChannel", None)
+            self.Filter_args = kwargs['kwargs_pre'].get('Filter_args')
+        self.isIncreEmgDim = kwargs['kwargs_pre'].get('isIncreEmgDim', False)
+        self.isMinusMeanEmgData = kwargs['kwargs_pre'].get('isMinusMeanEmgData', False)
+        self.segment = kwargs['kwargs_pre'].get("segment", 0)
+        self.emgChannel = kwargs['kwargs_pre'].get("emgChannel", None)
 
     def DataCut(self, ):
         '''数据截切
@@ -173,7 +174,7 @@ class DataPreprocessing():
                 EmgData, ImuData --> numpy
         '''
         self.emg, self.imu = emg, imu
-        if (not self.emg) or (not self.imu):
+        if ( self.emg.size ==0 ) or ( self.imu.size ==0):
             raise ValueError("数据不能为空")
         if self.isFilter:
             self.DataFilter()
@@ -217,11 +218,11 @@ class ExtractDataFeature():
                         N: TM_N对应的阶数
         '''
         self.emg, self.imu = None, None
-        kwargs = kwargs['kwargs']
+        # kwargs = kwargs['kwargs']
         # print(kwargs)
         self.kwargs_pre = kwargs['kwargs_pre']
         self.kwargs_feature = kwargs['kwargs_feature']  
-        self.dataPre = DataPreprocessing(kwargs = self.kwargs_pre)
+        self.dataPre = DataPreprocessing(kwargs_pre = self.kwargs_pre)
 
     ## 提取emg信号特征
     def EmgFeature(self, ):
@@ -265,37 +266,45 @@ class ExtractDataFeature():
         feature_list = []
         for EMGFeatureType in EMGFeatureTypes:
             Fea = []
-            for i in range(len(self.emg)):
-                feature = EMGDataFeature(self.emg[i])
-                Fea.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs))
+            if self.kwargs_pre["segment"]:
+                for i in range(len(self.emg)):
+                    feature = EMGDataFeature(self.emg[i])
+                    Fea.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs))
+            else:
+                feature = EMGDataFeature(self.emg)
+                Fea.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs)) 
             feature_list.append(Fea)
         return tuple(feature_list)
 
     ## 提取imu信号特征
     def ImuFeature(self, ):
         imu_Euler_angle = []
-        for s in range(len(self.imu)):
-            pitch, roll, yaw = data_change(self.imu[s])
-            angle = []
-            for i in range(len(pitch)):
-                feature = [0 for i in range(7)]
-                feature[0] = self.imu[s][i][0]
-                feature[1] = self.imu[s][i][1]
-                feature[2] = self.imu[s][i][2]
-                feature[3] = self.imu[s][i][3]
-                feature[4] = pitch[i]
-                feature[5] = roll[i]
-                feature[6] = yaw[i]
-                angle.append(feature)
-            imu_Euler_angle.append(angle)
-        return np.array(imu_Euler_angle)
+        if self.kwargs_pre["segment"]:
+            for s in range(len(self.imu)):
+                pitch, roll, yaw = data_change(self.imu[s])
+                angle = []
+                # for i in range(len(pitch)):
+                #     feature = [0 for i in range(7)]
+                #     feature[0] = self.imu[s][i][0]
+                #     feature[1] = self.imu[s][i][1]
+                #     feature[2] = self.imu[s][i][2]
+                #     feature[3] = self.imu[s][i][3]
+                #     feature[4] = pitch[i]
+                #     feature[5] = roll[i]
+                #     feature[6] = yaw[i]
+                angle.append(np.concatenate((self.imu[s][:,:4], pitch.reshape(self.imu[s].shape[0],1), roll.reshape(self.imu[s].shape[0],1), yaw.reshape(self.imu[s].shape[0],1)), axis=1))
+                imu_Euler_angle.append(angle)
+            return np.array(imu_Euler_angle)
+        else:
+            pitch, roll, yaw = data_change(self.imu)
+            return np.concatenate((self.imu[:,:4], pitch.reshape(self.imu.shape[0],1), roll.reshape(self.imu.shape[0],1), yaw.reshape(self.imu.shape[0],1)), axis=1)
     
     def getFeature(self, emg, imu):
         '''整合信号
 
         '''
         self.emg, self.imu = emg, imu
-        if (not self.emg) or (not self.imu):
+        if (self.emg.size == 0) or (self.imu.size == 0):
             raise ValueError("数据不能为空")
         ## 数据预处理
         self.emg, self.imu = self.dataPre.DataPreprocess(self.emg, self.imu)
@@ -339,9 +348,9 @@ def ReadData(dataPath):
         yield emg, imu, label, scale
 
 ## 数据处理生成器
-def dataGenerator(dataPath, kwargs):
+def dataGenerator(dataPath, **kwargs):
     data = ReadData(dataPath)
-    dataPreproce = DataPreprocessing(kwargs = kwargs)
+    dataPreproce = DataPreprocessing(kwargs_pre= ["kwargs_pre"])
     while True:
         try:
             emg, imu, label, scale = next(data)
@@ -351,9 +360,9 @@ def dataGenerator(dataPath, kwargs):
             return
 
 ## 数据特征生成器
-def dataFeature(dataPath, kwargs):
+def dataFeature(dataPath, **kwargs):
     data = ReadData(dataPath)
-    dataFeatureExtract = ExtractDataFeature(kwargs = kwargs)
+    dataFeatureExtract = ExtractDataFeature(kwargs_pre= kwargs["kwargs_pre"], kwargs_feature=kwargs["kwargs_feature"])
     while True:
         try:
             emg, imu, label, scale = next(data)

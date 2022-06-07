@@ -10,14 +10,13 @@ import os
 
 if __name__ == '__main__':
     datapath =  r'D:/张江涛/实验/数据/word/'
-    kwargs = {
-    "kwargs_pre":{
-                  "isCut":True,
-                  "isStretch":True,
-                  "data_time":4, 
-                  "isFill":False,
-                  "isFilter":False,
-                  "Filter_args":{
+    kwargs_pre={
+                "isCut":True,
+                "isStretch":True,
+                "data_time":4, 
+                "isFill":False,
+                "isFilter":False,
+                "Filter_args":{
                                 "methold":"wave",
                                 "butter_args":{
                                                 "EmgCategory":'lowpass',
@@ -28,14 +27,14 @@ if __name__ == '__main__':
                                                 "ImuOrder":8
                                 },
                                 "wave_args":{
-                                              "w":"db7"
+                                            "w":"db7"
                                 }
-                  },
-                  "isMinusMeanEmgData":True,
-                  "isIncreEmgDim":False,
-                  "segment":100
-                   },
-    "kwargs_feature":{
+                },
+                "isMinusMeanEmgData":True,
+                "isIncreEmgDim":False,
+                "segment":100
+                }
+    kwargs_feature={
                     "EMGFeatureTypes":["IEMG","MAV","SSI","VAR","WL"], 
                     "EMGFeatureKwargs":{
                                         "ZC_threshold":0,
@@ -48,8 +47,7 @@ if __name__ == '__main__':
                                         "MTW_K":1,
                                         "N":2
                                         }
-                    },
-}
+                    }
 ## emg 数据进行规整
 def emgnorm(emg):
     emg = np.array(emg)
@@ -95,7 +93,7 @@ def ReadEmg(emg_path):
 # emg_feature2, _, _, _ = next(dataFeature)
 # print(data1)
 ## 数据特征提取器
-dataFeatureExtrech = ExtractDataFeature(kwargs = kwargs)
+dataFeatureExtrech = ExtractDataFeature(kwargs_pre = kwargs_pre, kwargs_feature= kwargs_feature)
 names = os.listdir(datapath)
 for name in names:
     filenames = os.listdir(datapath + name + '/emg/')
@@ -121,7 +119,7 @@ for name in names:
             for k in range(len(emg_feature1)):
                 # print(k)
                 ## 创建文件夹
-                title_ = title + kwargs["kwargs_feature"]["EMGFeatureTypes"][k] + '/'
+                title_ = title + kwargs_feature["EMGFeatureTypes"][k] + '/'
                 if not os.path.exists(title_):
                     os.makedirs(title_)
                 for dim in range(emg_feature1.shape[-1]):
