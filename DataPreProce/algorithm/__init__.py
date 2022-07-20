@@ -5,4 +5,5 @@ __all__ = [ "Attitude_Angle_solution",\
             "Butter_filter",\
             "emg_correct",\
             "emg_feature",\
+            "imu_feature", 
             "Laplace"]

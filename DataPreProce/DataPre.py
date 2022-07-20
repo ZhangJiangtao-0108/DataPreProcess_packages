@@ -9,6 +9,7 @@ from algorithm.cutting_algorithm import cut_data, stretch
 from algorithm.Attitude_Angle_solution import data_change
 from algorithm.emg_correct import correct
 from algorithm.emg_feature import EMGDataFeature
+from algorithm.imu_feature import IMUDataFeature
 from algorithm.Butter_filter import butter_filter, Wave_filter
 from algorithm.Data_Complement import Data_Complement
 
@@ -216,6 +217,7 @@ class ExtractDataFeature():
                         SSC_threshold: SSC对应的阈值，默认值为0
                         K: MAVSLP的特征参数，EMG数据对应的分段数，默认值为3
                         N: TM_N对应的阶数
+                    IMUFeatureType:提取IMU数据的特征类型，包括：[EULERANGLE, MEAN, SUM, VAR, STD]
         '''
         self.emg, self.imu = None, None
         # kwargs = kwargs['kwargs']
@@ -278,27 +280,39 @@ class ExtractDataFeature():
 
     ## 提取imu信号特征
     def ImuFeature(self, ):
+        IMUFeatureTypes = self.kwargs_feature['IMUFeatureTypes']
         imu_Euler_angle = []
-        if self.kwargs_pre["segment"]:
-            for s in range(len(self.imu)):
-                pitch, roll, yaw = data_change(self.imu[s])
-                angle = []
-                # for i in range(len(pitch)):
-                #     feature = [0 for i in range(7)]
-                #     feature[0] = self.imu[s][i][0]
-                #     feature[1] = self.imu[s][i][1]
-                #     feature[2] = self.imu[s][i][2]
-                #     feature[3] = self.imu[s][i][3]
-                #     feature[4] = pitch[i]
-                #     feature[5] = roll[i]
-                #     feature[6] = yaw[i]
-                angle.append(np.concatenate((self.imu[s][:,:4], pitch.reshape(self.imu[s].shape[0],1), roll.reshape(self.imu[s].shape[0],1), yaw.reshape(self.imu[s].shape[0],1)), axis=1))
-                imu_Euler_angle.append(angle)
-            return np.array(imu_Euler_angle)
-        else:
-            pitch, roll, yaw = data_change(self.imu)
-            return np.concatenate((self.imu[:,:4], pitch.reshape(self.imu.shape[0],1), roll.reshape(self.imu.shape[0],1), yaw.reshape(self.imu.shape[0],1)), axis=1)
-    
+        feature_list = []
+        for IMUFeatureType in IMUFeatureTypes:
+            Fea = []
+            if self.kwargs_pre["segment"]:
+                for i in range(len(self.imu)):
+                    feature = IMUDataFeature(self.imu[i])
+                    Fea.append(feature.getFeature(IMUFeatureType))
+
+
+                    # pitch, roll, yaw = data_change(self.imu[s])
+                    # angle = []
+                    # # for i in range(len(pitch)):
+                    # #     feature = [0 for i in range(7)]
+                    # #     feature[0] = self.imu[s][i][0]
+                    # #     feature[1] = self.imu[s][i][1]
+                    # #     feature[2] = self.imu[s][i][2]
+                    # #     feature[3] = self.imu[s][i][3]
+                    # #     feature[4] = pitch[i]
+                    # #     feature[5] = roll[i]
+                    # #     feature[6] = yaw[i]
+                    # angle.append(np.concatenate((self.imu[s][:,:4], pitch.reshape(self.imu[s].shape[0],1), roll.reshape(self.imu[s].shape[0],1), yaw.reshape(self.imu[s].shape[0],1)), axis=1))
+                    # imu_Euler_angle.append(angle)
+                # return np.array(imu_Euler_angle)
+            else:
+                feature = IMUDataFeature(self.imu)
+                Fea.append(feature.getFeature(IMUFeatureType))
+                # pitch, roll, yaw = data_change(self.imu)
+                # return np.concatenate((self.imu[:,:4], pitch.reshape(self.imu.shape[0],1), roll.reshape(self.imu.shape[0],1), yaw.reshape(self.imu.shape[0],1)), axis=1)
+            feature_list.append(Fea)
+        return tuple(feature_list)
+
     def getFeature(self, emg, imu):
         '''整合信号
 

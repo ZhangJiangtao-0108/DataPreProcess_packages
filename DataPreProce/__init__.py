@@ -12,4 +12,6 @@ __all__ = ["DataPre",\
             "algorithm.cutting_algorithm",\
             "algorithm.Butter_filter",\
             "algorithm.emg_correct",\
-            "algorithm.emg_feature"]
+            "algorithm.emg_feature",\
+            "algorithm.imu_feature",\
+            "algorithm.Laplace"]

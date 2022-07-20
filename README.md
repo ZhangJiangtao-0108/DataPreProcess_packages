@@ -48,7 +48,11 @@ from DataPreProce import *
 - AR: 
 - CC: 
 ## Features of IMU data
-- Quaternion to Euler Angle
+- EULERANGLE:Calculation of Euler angles from acceleration and angular velocity data of IMU
+- MEAN:Calculate the mean value of each dimension
+- SUM:Calculate the sum value of each dimension
+- VAR:Calculate the var value of each dimension
+- STD:Calculate the std value of each dimension
 ## Parameter Settings
 ### 1.Data processing and feature extraction parameter setting
 ```json
@@ -92,6 +96,7 @@ from DataPreProce import *
                                         "N":2
                                         }
                     },
+                    "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD"],
 }
 ```
 #### 'kwargs_pre' Parameter interpretation
@@ -198,6 +203,7 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
                                                 "N":2
                                                 }
                             },
+                            "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD"],
                     }
     }
 ```

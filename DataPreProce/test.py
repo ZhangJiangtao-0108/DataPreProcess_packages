@@ -46,7 +46,8 @@ if __name__ == '__main__':
                                         "MHW_K":1,
                                         "MTW_K":1,
                                         "N":2
-                                        }
+                                        },
+                    "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD"],
                     }
 ## emg 数据进行规整
 def emgnorm(emg):
