@@ -49,7 +49,7 @@ class IMUDataFeature():
             Returen IMU data feature.
 
             args:
-
+                FeatureType:Selected feature types,['EULERANGLE', 'MEAN', 'SUM', 'VAR', 'STD']
         '''
         if FeatureType == 'EULERANGLE':
             return self.EulerAngle()
