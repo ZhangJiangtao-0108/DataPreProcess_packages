@@ -156,6 +156,14 @@ from DataPreProce import *
 | MAVSLP | MAVSLP_K | is number of segments covering the EMG signal, The default value of 3 |
 | MHW | MHW_K | is the size of the hamming windows, the default value is 1 |
 | MTW | MTW_K | is the size of the hamming windows, the default value is 1 |
+#### IMU data feature table
+| IMUFeatureTypes | parameter | describe |
+|-----------------|-----------|----------|
+| EULERANGLE | None | Calculation of Euler angles from acceleration and angular velocity data of IMU |
+| MEAN | None | Calculate the mean value of each dimension |
+| SUM | None | Calculate the sum value of each dimension |
+| VAR | None | Calculate the var value of each dimension |
+| STD | None | Calculate the std value of each dimension |
 ### 2.DataSets parameter setting
 ```json
 kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
