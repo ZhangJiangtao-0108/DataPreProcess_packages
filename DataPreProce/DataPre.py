@@ -1,6 +1,7 @@
 '''
     数据处理
 '''
+import imp
 import numpy as np
 import os
 from scipy.fftpack import fft,ifft
@@ -12,6 +13,7 @@ from algorithm.emg_feature import EMGDataFeature
 from algorithm.imu_feature import IMUDataFeature
 from algorithm.Butter_filter import butter_filter, Wave_filter
 from algorithm.Data_Complement import Data_Complement
+from utils.ReadFile import ReadFile
 
 ## 数据预处理
 class DataPreprocessing():
@@ -335,22 +337,9 @@ def ReadData(dataPath):
     for emgDataName in emgDataNames:
         emgDataPath = dataPath + 'emg/' + emgDataName
         imuDataPath = emgDataPath.replace('emg', 'imu')
-        # print(emgDataPath)
-        # print(imuDataPath)
-        ## 读取文件
-        emgFile = open(emgDataPath, 'r')
-        imuFile = open(imuDataPath, 'r')
-        emg = emgFile.read().strip().split('\n')
-        for i in range(len(emg)):
-            emg[i] = emg[i].strip().split(' ')
-            emg[i] = [int(i) for i in emg[i]]
-        imu = imuFile.read().strip().split('\n')
-        for i in range(len(imu)):
-            imu[i] = imu[i].strip().split(' ')
-            imu[i] = [float(i) for i in imu[i]]
-        ## 关闭文件
-        emgFile.close()
-        imuFile.close()
+        ## 获取emg和imu数据
+        emg = ReadFile(emgDataPath, DataType= "int")
+        imu = ReadFile(imuDataPath, DataType= "float")
         ## 生成label
         fuhao = ',\!?。，？！、 '
         for x in fuhao:
