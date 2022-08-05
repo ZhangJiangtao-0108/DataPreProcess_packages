@@ -216,9 +216,50 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
     }
 ```
 ## Other Algorithm
-| Algorithm | parameter | describe |
-|-----------------|-----------|----------|
-|Laplace|||
+| Algorithm | describe |
+|-----------------|----------|
+|Attitude_Angle_solution||
+|Butter_filter||
+|cutting_algorithm||
+|Data_Complement||
+|emg_correct||
+|emg_feature||
+|imu_feature||
+|Laplace||
+## Utils
+### 1、GetDataEnvelope
+Generate data envelopes
+### 2、GetGestureDic
+Get the gestures in the sign language library and generate the dictionary
+### 3、ReadFile
+Read the file
+
+### 4、ReDimFeature
+
+Dimensionality reduction of the data, the methods available are PCA, UMAP, TSNE
+
+- Parameter setting
+```json
+ReDimFeature_kwargs = {
+        "Method":"UMAP",
+        "PCA_kwargs":{
+            "n_components":2, 
+
+        },
+        "UMAP_kwargs":{
+            "n_components":2, #控制投影后的维数，为了方便可视化，默认值为2
+            "n_neighbors":15, #控制UMAP在后见流形时为每个样本产看的本地邻域的区域，较小的值将关注点缩小到局部结构，考虑到特性和小模式，可能失去全局性。
+            "min_dist":0.9, #控制数据点之间的字面距离
+            "metric":'correlation', #计算点之间的距离公式，默认值为‘euclidean’，还可以选择manhattan包括minkowski和chebyshev
+            "random_state":35,
+        },
+        "TSNE_kwargs":{
+            "n_components":2, 
+            "init":"pca",
+            "random_state":3,
+        },
+    }
+```
 ## References
 [1] A. Phinyomark, P. Phukpattaranont, and C. Limsakul,“Feature reduction and selection for EMG signal classification,” Expert Syst. Appl., vol. 39, no. 8, pp. 7420–7431, 2012  
 [2] F. A. Mahdavi, S. A. Ahmad, M. H. Marhaban, and M.-R. Akhbarzadeh-T, “Surface Electromyography Feature Extraction Based on Wavelet Transform,” Int. J. Integr. Eng., vol. 4, no. 3, pp. 1–7, 2012  
