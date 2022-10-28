@@ -83,7 +83,7 @@ from DataPreProce import *
                   "emgChannel":[]
                    },
     "kwargs_feature":{
-                    "EMGFeatureTypes":["IEMG"," MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"], 
+                    "EMGFeatureTypes":["IEMG","MAV", "MAV1", "MAV2", "SSI", "VAR", "TM_N", "RMS", "V", "LOG", "WL", "AAC", "DASDV", "ZC", "MYOP", "WAMP", "SSC", "MAVSLP", "MHW", "MTW", "HIST", "HIST", "AR", "CC"], 
                     "EMGFeatureKwargs":{
                                         "ZC_threshold":0,
                                         "MYOP_threshold":0,
@@ -94,9 +94,9 @@ from DataPreProce import *
                                         "MHW_K":1,
                                         "MTW_K":1,
                                         "N":2
-                                        }
-                    },
+                                        },
                     "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD"],
+                    },
 }
 ```
 #### 'kwargs_pre' Parameter interpretation

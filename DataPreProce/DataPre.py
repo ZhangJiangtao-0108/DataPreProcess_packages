@@ -353,7 +353,7 @@ def ReadData(dataPath):
 ## 数据处理生成器
 def dataGenerator(dataPath, **kwargs):
     data = ReadData(dataPath)
-    dataPreproce = DataPreprocessing(kwargs_pre= ["kwargs_pre"])
+    dataPreproce = DataPreprocessing(kwargs_pre=kwargs ["kwargs_pre"])
     while True:
         try:
             emg, imu, label, scale = next(data)
