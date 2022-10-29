@@ -23,7 +23,8 @@ pip install DataPreProcess_packages-1.0.tar.gz
 from DataPreProce import *
 ```
 
-## Features of EMG data
+## DataPreProce
+### Features of EMG data
 - IEMG: Definiyion of IEMG feature is definend as a summation of absolute value of the EMG sign amplitude.
 - MAV: Mean absolute value(MAV) feature is an aberage of absolute value of the EMG signal amplituden in a segment.
 - MAV1：Modified mean absolute value type 1 (MAV1) is an extension of MAV feature. The weighted window function wi is assigned into the equation for improving robustness of MAV feature.
@@ -47,14 +48,14 @@ from DataPreProce import *
 - HIST: 
 - AR: 
 - CC: 
-## Features of IMU data
+### Features of IMU data
 - EULERANGLE:Calculation of Euler angles from acceleration and angular velocity data of IMU
 - MEAN:Calculate the mean value of each dimension
 - SUM:Calculate the sum value of each dimension
 - VAR:Calculate the var value of each dimension
 - STD:Calculate the std value of each dimension
-## Parameter Settings
-### 1.Data processing and feature extraction parameter setting
+### Parameter Settings
+#### 1.Data processing and feature extraction parameter setting
 ```json
  kwargs = {
     "kwargs_pre":{
@@ -99,7 +100,7 @@ from DataPreProce import *
                     },
 }
 ```
-#### 'kwargs_pre' Parameter interpretation
+##### 'kwargs_pre' Parameter interpretation
 | Parameter | Describe |
 |-----------|----------|
 | isCut | Determine if the data needs to be cutted |
@@ -112,7 +113,7 @@ from DataPreProce import *
 | isIncreEmgDim | Determine whether the EMG data needs to be dimensioned |
 | segment | Number of data segments |
 | emgChannel | Select the EMG data channel |
-##### Filter_args
+###### Filter_args
 | Parameter | default| Describe |
 |-----------|--------|----------|
 | methold | butter | Selective filtering method, include butter and wave|
@@ -133,7 +134,7 @@ from DataPreProce import *
 | Parameter | default| Describe |
 |-----------|--------|----------|
 | w | db7 | The wavelet function |
-#### EMG data feature table
+##### EMG data feature table
 | EMGFeatureTypes | parameter | describe |
 |-----------------|-----------|----------|
 | IEMG | None | None |
@@ -156,7 +157,7 @@ from DataPreProce import *
 | MAVSLP | MAVSLP_K | is number of segments covering the EMG signal, The default value of 3 |
 | MHW | MHW_K | is the size of the hamming windows, the default value is 1 |
 | MTW | MTW_K | is the size of the hamming windows, the default value is 1 |
-#### IMU data feature table
+##### IMU data feature table
 | IMUFeatureTypes | parameter | describe |
 |-----------------|-----------|----------|
 | EULERANGLE | None | Calculation of Euler angles from acceleration and angular velocity data of IMU |
@@ -164,7 +165,7 @@ from DataPreProce import *
 | SUM | None | Calculate the sum value of each dimension |
 | VAR | None | Calculate the var value of each dimension |
 | STD | None | Calculate the std value of each dimension |
-### 2.DataSets parameter setting
+#### 2.DataSets parameter setting
 ```json
 kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
             "SaveDataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
@@ -215,7 +216,7 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
                     }
     }
 ```
-## Other Algorithm
+### Other Algorithm
 | Algorithm | describe |
 |-----------------|----------|
 |Attitude_Angle_solution||
@@ -226,15 +227,15 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
 |emg_feature||
 |imu_feature||
 |Laplace||
-## Utils
-### 1、GetDataEnvelope
+### Utils
+#### 1、GetDataEnvelope
 Generate data envelopes
-### 2、GetGestureDic
+#### 2、GetGestureDic
 Get the gestures in the sign language library and generate the dictionary
-### 3、ReadFile
+#### 3、ReadFile
 Read the file
 
-### 4、ReDimFeature
+#### 4、ReDimFeature
 
 Dimensionality reduction of the data, the methods available are PCA, UMAP, TSNE
 
@@ -260,11 +261,21 @@ ReDimFeature_kwargs = {
         },
     }
 ```
-## References
+### References
 [1] A. Phinyomark, P. Phukpattaranont, and C. Limsakul,“Feature reduction and selection for EMG signal classification,” Expert Syst. Appl., vol. 39, no. 8, pp. 7420–7431, 2012  
 [2] F. A. Mahdavi, S. A. Ahmad, M. H. Marhaban, and M.-R. Akhbarzadeh-T, “Surface Electromyography Feature Extraction Based on Wavelet Transform,” Int. J. Integr. Eng., vol. 4, no. 3, pp. 1–7, 2012  
 [3] E. Gokgoz and A. Subasi, “Comparison of decision tree algorithms for EMG signal classification using DWT,” Biomed. Signal Process. Control, vol. 18, pp. 138–144, 2015  
 [4] Burhan, N. ,  M. Kasno , and  R. Ghazali . "Feature extraction of surface electromyography (sEMG) and signal processing technique in wavelet transform: A review." 2016 IEEE International Conference on Automatic Control and Intelligent Systems (I2CACIS) IEEE, 2016.  
 [5]I. Elamvazuthi, G. A. Ling, K. A. R. K. Nurhanim, P. Vasant, and S. Parasuraman, “Surface electromyography (sEMG) feature extraction based on Daubechies wavelets,” Proc. 2013 IEEE 8th Conf. Ind. Electron. Appl. ICIEA 2013, pp. 1492– 1495, 2013.  
 
+## DataStatistics
+### utils
+#### SentenceGestureStatistics
+Perform statistics on the dataset.
+
+
+## DataPostProce
+### utils
+#### Labels2Text 
+#### HistoryShow
 
