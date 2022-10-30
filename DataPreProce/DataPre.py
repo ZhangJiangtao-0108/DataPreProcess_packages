@@ -351,25 +351,27 @@ def ReadData(dataPath):
         yield emg, imu, label, scale
 
 ## 数据处理生成器
-def dataGenerator(dataPath, **kwargs):
+def dataGenerator(dataPath, LabelGenerator, **kwargs):
     data = ReadData(dataPath)
     dataPreproce = DataPreprocessing(kwargs_pre=kwargs ["kwargs_pre"])
     while True:
         try:
             emg, imu, label, scale = next(data)
             emgPre, imuPre = dataPreproce.DataPreprocess(emg, imu)
-            yield np.array(emgPre), np.array(imuPre), label, scale
+            label = LabelGenerator(label)
+            yield np.array(emgPre), np.array(imuPre), np.array(label), scale
         except StopIteration:
             return
 
 ## 数据特征生成器
-def dataFeature(dataPath, **kwargs):
+def dataFeature(dataPath, LabelGenerator, **kwargs):
     data = ReadData(dataPath)
     dataFeatureExtract = ExtractDataFeature(kwargs_pre= kwargs["kwargs_pre"], kwargs_feature=kwargs["kwargs_feature"])
     while True:
         try:
             emg, imu, label, scale = next(data)
             emg_feature, imu_feature = dataFeatureExtract.getFeature(emg, imu)
-            yield np.array(emg_feature), np.array(imu_feature), label, scale
+            label = LabelGenerator(label)
+            yield np.array(emg_feature), np.array(imu_feature), np.array(label), scale
         except StopIteration:
             return
