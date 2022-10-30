@@ -43,7 +43,7 @@ class Labels2Text():
         '''
             Get geature dic.
         '''
-        with open(Gesture_dic_path,'r', encoding='gbk') as gesture_dic_file:
+        with open(Gesture_dic_path,'r') as gesture_dic_file:
             self.Gesture_dic_ = eval(gesture_dic_file.readline())
             self.__changeKeyValue()
 
