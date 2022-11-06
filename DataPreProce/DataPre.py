@@ -3,6 +3,7 @@
 '''
 import imp
 import numpy as np
+import operator
 import os
 from scipy.fftpack import fft,ifft
 import sys
@@ -278,7 +279,7 @@ class ExtractDataFeature():
                 feature = EMGDataFeature(self.emg)
                 Fea.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs)) 
             feature_list.append(Fea)
-        return tuple(feature_list)
+        return np.array(feature_list, dtype=object)
 
     ## 提取imu信号特征
     def ImuFeature(self, ):
@@ -313,7 +314,7 @@ class ExtractDataFeature():
                 # pitch, roll, yaw = data_change(self.imu)
                 # return np.concatenate((self.imu[:,:4], pitch.reshape(self.imu.shape[0],1), roll.reshape(self.imu.shape[0],1), yaw.reshape(self.imu.shape[0],1)), axis=1)
             feature_list.append(Fea)
-        return tuple(feature_list)
+        return np.array(feature_list, dtype=object)
 
     def getFeature(self, emg, imu):
         '''整合信号
@@ -327,6 +328,8 @@ class ExtractDataFeature():
         ## 特征提取
         emgFeature = self.EmgFeature()
         imuFeature = self.ImuFeature()
+        emgFeature = np.array(emgFeature, dtype=object).T
+        imuFeature = np.array(imuFeature, dtype=object).T
 
         return emgFeature, imuFeature
         
@@ -373,5 +376,66 @@ def dataFeature(dataPath, LabelGenerator, **kwargs):
             emg_feature, imu_feature = dataFeatureExtract.getFeature(emg, imu)
             label = LabelGenerator(label)
             yield np.array(emg_feature), np.array(imu_feature), np.array(label), scale
+        except StopIteration:
+            return
+
+## 读取双手手势数据
+def ReadTHData(LeftDataPath, RightDataPath):
+    ## 读取emg数据文件名
+    LeftEMGDataNames = os.listdir(LeftDataPath + 'emg/')
+    RightEMGDataNames = os.listdir(RightDataPath + 'emg/')
+    try:
+        for LeftEMGDataName, RightEMGDataName in zip(LeftEMGDataNames, RightEMGDataNames):
+            LeftEMGDataPath = LeftDataPath + 'emg/' + LeftEMGDataName
+            LeftIMUDataPath = LeftEMGDataPath.replace('emg', 'imu')
+            RightEMGDataPath = RightDataPath + 'emg/' + RightEMGDataName
+            RightIMUDataPath = RightEMGDataPath.replace('emg', 'imu')
+            ## 获取emg和imu数据
+            Leftemg = ReadFile(LeftEMGDataPath, DataType= "int")
+            Leftimu = ReadFile(LeftIMUDataPath, DataType= "float")
+            Rightemg = ReadFile(RightEMGDataPath, DataType= "int")
+            Righrimu = ReadFile(RightIMUDataPath, DataType= "float")
+            ## 生成label
+            fuhao = ',\!?。，？！、 '
+            for x in fuhao:
+                if x in LeftEMGDataName and x in RightEMGDataName:
+                    LeftEMGDataName = LeftEMGDataName.replace(x,'')
+                    RightEMGDataName = RightEMGDataName.replace(x,'')
+            Leftlabel = LeftEMGDataName.split('_')[0].split('-')
+            Rightlabel = RightEMGDataName.split('_')[0].split('-')
+            if operator.eq(Leftlabel,Rightlabel) == False:
+                raise ValueError("left-right hand mismatch.")
+            ## 生成志愿者
+            scale = LeftEMGDataName.split('_')[1]
+            yield Leftemg, Leftimu, Rightemg, Righrimu, Leftlabel, scale
+    except ValueError as e:
+        print("ValueError:",e)
+        pass
+
+## 双手数据处理生成器
+def dataTHGenerator(dataPath, LabelGenerator, **kwargs):
+    data = ReadTHData(dataPath["Left"], dataPath["Right"])
+    dataPreproce = DataPreprocessing(kwargs_pre=kwargs ["kwargs_pre"])
+    while True:
+        try:
+            Leftemg, Leftimu, Rightemg, Rightimu, label, scale = next(data)
+            LeftemgPre, LeftimuPre = dataPreproce.DataPreprocess(Leftemg, Leftimu)
+            RightemgPre, RightimuPre = dataPreproce.DataPreprocess(Rightemg, Rightimu)
+            label = LabelGenerator(label)
+            yield np.array(LeftemgPre), np.array(LeftimuPre), np.array(RightemgPre), np.array(RightimuPre), label, scale
+        except StopIteration:
+            return
+
+## 双手数据特征生成器
+def dataTHFeature(dataPath, LabelGenerator, **kwargs):
+    data = ReadTHData(dataPath["Left"], dataPath["Right"])
+    dataFeatureExtract = ExtractDataFeature(kwargs_pre= kwargs["kwargs_pre"], kwargs_feature=kwargs["kwargs_feature"])
+    while True:
+        try:
+            Leftemg, Leftimu, Rightemg, Rightimu, label, scale = next(data)
+            Leftemg_feature, Leftimu_feature = dataFeatureExtract.getFeature(Leftemg, Leftimu)
+            Rightemg_feature, Rightimu_feature = dataFeatureExtract.getFeature(Rightemg, Rightimu)
+            label = LabelGenerator(label)
+            yield np.array(Leftemg_feature), np.array(Leftimu_feature), np.array(Rightemg_feature), np.array(Rightimu_feature), label, scale
         except StopIteration:
             return
