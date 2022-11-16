@@ -7,7 +7,7 @@ import operator
 import os
 from scipy.fftpack import fft,ifft
 import sys
-from algorithm.cutting_algorithm import cut_data, stretch
+from algorithm.cutting_algorithm import cut_data, Stretch
 from algorithm.Attitude_Angle_solution import data_change
 from algorithm.emg_correct import correct
 from algorithm.emg_feature import EMGDataFeature
@@ -53,7 +53,8 @@ class DataPreprocessing():
         '''数据拉伸
             
         '''
-        self.emg, self.imu = stretch(self.emg, self.imu, self.data_time)
+        stretcher = Stretch(self.data_time)
+        self.emg, self.imu = stretcher.stretch(self.emg, self.imu)
     
 
     def DataFill(self, emg_value = 0,  imu_value = 0):
@@ -350,7 +351,7 @@ def ReadData(dataPath):
                 emgDataName = emgDataName.replace(x,'')
         label = emgDataName.split('_')[0].split('-')
         ## 生成志愿者
-        scale = emgDataName.split('_')[1]
+        scale = emgDataName.split('_')[-3]
         yield emg, imu, label, scale
 
 ## 数据处理生成器
@@ -406,7 +407,7 @@ def ReadTHData(LeftDataPath, RightDataPath):
             if operator.eq(Leftlabel,Rightlabel) == False:
                 raise ValueError("left-right hand mismatch.")
             ## 生成志愿者
-            scale = LeftEMGDataName.split('_')[1]
+            scale = LeftEMGDataName.split('_')[-3]
             yield Leftemg, Leftimu, Rightemg, Righrimu, Leftlabel, scale
     except ValueError as e:
         print("ValueError:",e)

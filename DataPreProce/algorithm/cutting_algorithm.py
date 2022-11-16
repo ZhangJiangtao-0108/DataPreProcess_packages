@@ -147,3 +147,93 @@ def stretch(emg_data,imu_data,data_time):
 
     return np.array(emg_data), np.array(imu_data)
 
+class Stretch():
+    '''
+    
+    '''
+    def __init__(self, data_time):
+        self.emg_len = data_time * 200
+        self.imu_len = data_time * 50
+
+    def stretch(self, emg_data, imu_data, Segment:bool=None):
+        '''
+        将切割出来的信号转换成为统一长度，长的缩短，短的伸长。
+        :param emg_data:
+        :param imu_data:
+        :return:
+        '''
+        emg_data = list(emg_data)
+        imu_data = list(imu_data)  
+        if Segment:
+            emg_len, imu_len = self.emg_len / 10, self.imu_len / 10
+        else:
+            emg_len, imu_len = self.emg_len, self.imu_len
+        if len(emg_data) <= emg_len:
+            '''
+            将emg信号伸长，在确定的位置处添加数据
+            '''
+            emg_difference = emg_len - len(emg_data)
+            if emg_difference > 0:
+                emg_step = len(emg_data) / emg_difference
+                for i in range(emg_difference):
+                    temp = []
+                    for j in range(8):
+                        temp.append((emg_data[int(emg_step*(emg_difference-i))-2][j] + emg_data[int(emg_step*(emg_difference-i))-1][j])/2)
+                    emg_data.insert(int(emg_step*(emg_difference-i))-1,temp)
+            else:
+                emg_data = emg_data
+        else:
+            '''
+            将emg数据缩短，在确定位置处删除数据
+            '''
+            emg_difference = len(emg_data) - emg_len
+            emg_step = len(emg_data) / emg_difference
+            for i in range(emg_difference):
+                del emg_data[int(emg_step*(emg_difference-i))-1]
+
+
+        if len(imu_data) <= imu_len:
+            '''
+            将imu信号伸长，在确定的位置处添加数据
+            '''
+            imu_difference = imu_len - len(imu_data)
+            if imu_difference > 0:
+                imu_step = len(imu_data) / imu_difference
+                for i in range(imu_difference):
+                    temp = []
+                    for j in range(10):
+                        temp.append((imu_data[int(imu_step*(imu_difference-i))-2][j] + imu_data[int(imu_step*(imu_difference-i))-1][j])/2)
+                    imu_data.insert(int(imu_step*(imu_difference-i))-1,temp)
+            else:
+                imu_data = imu_data
+        else:
+            '''
+            将imu数据缩短，在确定位置处删除数据
+            '''
+            imu_difference = len(imu_data) - imu_len
+            imu_step = len(imu_data) / imu_difference
+            for i in range(imu_difference):
+                del imu_data[int(imu_step*(imu_difference-i))-1]
+
+        return np.array(emg_data), np.array(imu_data)
+
+    def segment_stretch(self, emg_data, imu_data):
+        '''
+        
+        '''
+        emg_shape = emg_data.shape
+        imu_shape = imu_data.shape
+        emg_shape[0] = self.emg_len
+        imu_shape[0] = self.imu_len
+        emg = np.zeros(emg_shape)
+        imu = np.zeros(imu_shape)
+        emg_step = self.emg_len / 10
+        imu_step = self.imu_len / 10
+        emg_segment_len = int(len(emg_data) / 10)
+        imu_segment_len = int(len(imu_data) / 10)
+
+        for i in range(9):
+            emg[i*emg_step:(i+1)*emg_step], imu[i*imu_step:(i+1)*imu_step] = self.stretch(emg_data[i * emg_segment_len: (i+1) * emg_segment_len], imu_data[i * imu_segment_len: (i+1) * imu_segment_len], Segment= True) 
+        emg[9*emg_step:], imu[9*imu_step:] = self.stretch(emg_data[9 * emg_segment_len:], imu_data[9 * imu_segment_len:], Segment= True)
+        return emg, imu
+
