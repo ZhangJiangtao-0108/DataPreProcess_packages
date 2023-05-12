@@ -120,7 +120,19 @@ class FindSegSections():
         FinalSegSection = self.DecSegSection()
         return FinalSegSection
 
-
+def SegSkeleton(skeleton, SavePath, SegSection, BodySection):
+    filename = SavePath.split("/")[-1] 
+    bodyLadmarks = skeleton["bodyLandmarks"]
+    handLandmarks = skeleton["handLandmarks"]
+    ## 对骨骼点进行修正
+    for i in range(len(bodyLadmarks)):
+        bodyLadmarks[i][:,0] = bodyLadmarks[i][:, 0] -  BodySection[0]
+        for j in range(len(handLandmarks[i])):
+            handLandmarks[i][j][:, 0] = np.maximum(handLandmarks[i][j][:, 0] - BodySection[0], 0)
+    for i in range(len(SegSection)):
+        result_file  = SavePath+ "_" + str(i+1) + "/" + filename + "_" + str(i+1) + ".npz"
+        np.savez(result_file, subsets = skeleton["subsets"][SegSection[i][0]:SegSection[i][1]], bodyLandmarks = bodyLadmarks[SegSection[i][0]:SegSection[i][1]], handLandmarks = handLandmarks[SegSection[i][0]:SegSection[i][1]])
+    
 
 def SegVideo(Video, SavePath, SegSection, BodySection):
     ## 获取视频名称
@@ -183,7 +195,7 @@ def StartSegVedios(Filenames, PathKwargs, ParametersKwargs):
         skeleton = np.load(skeleton_file, allow_pickle=True)
         subsets = skeleton["subsets"]
         bodyLadmarks = skeleton["bodyLandmarks"]
-        
+        handLandmarks = skeleton["handLandmarks"]
         try:
             ## 人物区间范围
             body_max = 0
@@ -207,6 +219,11 @@ def StartSegVedios(Filenames, PathKwargs, ParametersKwargs):
             ## 分割视频
             Video = Video_path + filename.split(".")[0] + ".mp4"
             SegVideo(Video, Save_Path, SegSection, BodySection)
+
+            ## 保存对应的骨骼信息
+            SkeletionPath = Save_Path + filename.split(".")[0]
+            SegSkeleton(skeleton, SkeletionPath, SegSection, BodySection)
+
             ## 保存分割结果
             with open(SegRes_Path + filename.split(".")[0] + ".txt","w") as SegFile:
                 print(SegSection, file= SegFile)
@@ -258,9 +275,9 @@ if __name__ == "__main__":
     f.close()
     # print(Filenames)
     ParametersKwargs = {
-        "Steps":[int(i) for i in range(10, 20)],
-        "Thresholds":[int(i*5) for i in range(4,13)],
-        "D":[int(i) for i in range(4,12) ],
+        "Steps":[int(i) for i in range(16, 20)],
+        "Thresholds":[int(i*5) for i in range(4,6)],
+        "D":[int(i) for i in range(9,12)],
     }
     SegErrorFiles, ErrorFiles = StartSegVedios(Filenames, PathKwargs, ParametersKwargs)
     # print(SegErrorFiles)
