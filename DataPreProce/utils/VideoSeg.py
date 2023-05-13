@@ -1,3 +1,9 @@
+'''
+Video Segment
+Date:2023-4-13
+Author:ZhangJiangtao-0108
+Github:https://github.com/ZhangJiangtao-0108/DataPreProcess_packages
+'''
 import cv2
 from tqdm import tqdm
 import os
@@ -31,7 +37,7 @@ class FindSegSections():
 
     def FindSegSets(self, step, Threshold, d: int):
         '''
-            根据前后帧的动作变化来决定（目前尚未完善）
+            根据前后帧的动作变化来决定
         '''
         ## 寻找视频分割区区间
         SegSection = []
@@ -135,6 +141,15 @@ def SegSkeleton(skeleton, SavePath, SegSection, BodySection):
     
 
 def SegVideo(Video, SavePath, SegSection, BodySection):
+    '''
+        对视频进行分割
+
+        args:
+            Video: 视频路径
+            SavePath: 保存结果路径
+            SegSection: 分割区间
+            BodySection: 身体在图像中的区域
+    '''
     ## 获取视频名称
     video_name = Video.split("/")[-1].split('.')[0]
 
@@ -169,6 +184,21 @@ def SegVideo(Video, SavePath, SegSection, BodySection):
     cap.release()  # 关闭读取视频对象
 
 def StartSegVedios(Filenames, PathKwargs, ParametersKwargs):
+    '''
+        根据骨骼信息对图像进行分割
+
+        args:
+            Filenames: skeleton的文件列表
+            PathKwargs: 路径参数
+                Video_path: 视频文件根路径
+                npz_Path: 骨骼文件根路径
+                Save_Path: 结果保存根路径
+                SegRes_Path: 分割区间保存路径
+            ParametersKwargs: 分割参数
+                Steps: 步长列表
+                Thresholds: 阈值列表
+                D: 差值列表
+    '''
     Video_path = PathKwargs["Video_path"]
     npz_Path = PathKwargs["npz_Path"]
     Save_Path = PathKwargs["Save_Path"]
