@@ -216,7 +216,7 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
                     }
     }
 ```
-### Other Algorithm
+### Algorithm
 | Algorithm | describe |
 |-----------------|----------|
 |Attitude_Angle_solution||
@@ -226,17 +226,20 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
 |emg_correct||
 |emg_feature||
 |imu_feature||
-|Laplace||
+|Laplace|Implementing the Laplace-algorithm|
+|Normalization|Normalize the data|
+
 ### Utils
-#### 1、GetDataEnvelope
-Generate data envelopes
-#### 2、GetGestureDic
-Get the gestures in the sign language library and generate the dictionary
-#### 3、ReadFile
-Read the file
+| Utils | describe |
+|-----------------|----------|
+|GetDataEnvelope|Generate data envelopes|
+|GetGestureDic|Get the gestures in the sign language library and generate the dictionary (Include the processing of synonyms) |
+|ReadFile|Read the emg or imu file|
+|ReDimFeature|Dimensionality reduction of the data, the methods available are PCA, UMAP, TSNE|
+|TrainTestSplit|Divide the data set|
+|VideoSeg|Divide the videos, mainly for the same video containing multiple repetitive sign language sentences|
 
-#### 4、ReDimFeature
-
+#### ReDimFeature
 Dimensionality reduction of the data, the methods available are PCA, UMAP, TSNE
 
 - Parameter setting
@@ -261,6 +264,21 @@ ReDimFeature_kwargs = {
         },
     }
 ```
+#### VideoSeg
+Divide the videos, mainly for the same video containing multiple repetitive sign language sentences. The segmentation method mainly uses skeletal information, which is obtained by the openpose method:https://github.com/Hzzone/pytorch-openpose
+- Parameter setting
+```json
+PathKwargs = {
+        "Video_path":"",  ## 视频路径 
+        "npz_Path":"",   ## 骨骼路径，这里用npz数据格式进行保存 
+        "Save_Path":"",  ## 保存路径，分别保存视频和骨骼信息
+    }
+ParametersKwargs = {
+        "Steps":[int(i) for i in range(10, 16)], ## 向前和向后看的步长
+        "Thresholds":[int(i*5) for i in range(6,11)], ## 阈值大小设置
+        "D":[int(i) for i in range(4,9) ], ## 用来控制统计个数的对比
+    }
+```
 ### References
 [1] A. Phinyomark, P. Phukpattaranont, and C. Limsakul,“Feature reduction and selection for EMG signal classification,” Expert Syst. Appl., vol. 39, no. 8, pp. 7420–7431, 2012  
 [2] F. A. Mahdavi, S. A. Ahmad, M. H. Marhaban, and M.-R. Akhbarzadeh-T, “Surface Electromyography Feature Extraction Based on Wavelet Transform,” Int. J. Integr. Eng., vol. 4, no. 3, pp. 1–7, 2012  
@@ -270,12 +288,16 @@ ReDimFeature_kwargs = {
 
 ## DataStatistics
 ### utils
-#### SentenceGestureStatistics
-Perform statistics on the dataset.
+| Utils | describe |
+|-----------------|----------|
+|SentenceGestureStatistics|Perform statistics on the dataset|
 
 
 ## DataPostProce
 ### utils
-#### Labels2Text 
-#### HistoryShow
+| Utils | describe |
+|-----------------|----------|
+|Labels2Text|Convert digital labels into corresponding text|
+|Computer_WER|Calculate word error rate|
+
 

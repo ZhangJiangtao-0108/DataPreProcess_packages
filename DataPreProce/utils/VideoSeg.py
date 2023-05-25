@@ -127,7 +127,7 @@ class FindSegSections():
         return FinalSegSection
 
 def SegSkeleton(skeleton, SavePath, SegSection, BodySection):
-    filename = SavePath.split("/")[-1] 
+    
     bodyLadmarks = skeleton["bodyLandmarks"]
     handLandmarks = skeleton["handLandmarks"]
     ## 对骨骼点进行修正
@@ -136,7 +136,7 @@ def SegSkeleton(skeleton, SavePath, SegSection, BodySection):
         for j in range(len(handLandmarks[i])):
             handLandmarks[i][j][:, 0] = np.maximum(handLandmarks[i][j][:, 0] - BodySection[0], 0)
     for i in range(len(SegSection)):
-        result_file  = SavePath+ "_" + str(i+1) + "/" + filename + "_" + str(i+1) + ".npz"
+        result_file  = SavePath + "_" + str(i+1) + ".npz"
         np.savez(result_file, subsets = skeleton["subsets"][SegSection[i][0]:SegSection[i][1]], bodyLandmarks = bodyLadmarks[SegSection[i][0]:SegSection[i][1]], handLandmarks = handLandmarks[SegSection[i][0]:SegSection[i][1]])
     
 
@@ -162,10 +162,10 @@ def SegVideo(Video, SavePath, SegSection, BodySection):
 
     ## 获取视频帧
     for num in range(len(SegSection)):
-        filefolder = SavePath  +   video_name + "_" + str(num+1)
-        output = filefolder + "/" + video_name + "_" + str(num+1) + ".mp4"
-        if os.path.exists(filefolder) == False:
-            os.mkdir(filefolder)
+        # filefolder = SavePath  +   video_name + "_" + str(num+1)
+        output = SavePath + "/" + video_name + "_" + str(num+1) + ".mp4"
+        # if os.path.exists(filefolder) == False:
+        #     os.mkdir(filefolder)
 
         videowriter = cv2.VideoWriter(output, fourcc, fps, (int(weight), int(height)))  # 创建一个写入视频对象
         
@@ -176,7 +176,7 @@ def SegVideo(Video, SavePath, SegSection, BodySection):
             ret, frame = cap.read()  # 从开始帧开始读取，之后会从开始帧依次往后读取，直到退出循环
             # if ret:
             newframe = frame[ :,BodySection[0]:BodySection[1]]
-            cv2.imwrite(filefolder + "/" + str(int(pos-start)) + ".jpg",newframe)  # 利用'写入视频对象'写入帧
+            # cv2.imwrite(filefolder + "/" + str(int(pos-start)) + ".jpg",newframe)  # 利用'写入视频对象'写入帧
             videowriter.write(newframe)  # 保存成对应的视频
             pos = cap.get(cv2.CAP_PROP_POS_FRAMES)  # 获取当前帧数pos
             cv2.waitKey(1)
@@ -202,11 +202,17 @@ def StartSegVedios(Filenames, PathKwargs, ParametersKwargs):
     Video_path = PathKwargs["Video_path"]
     npz_Path = PathKwargs["npz_Path"]
     Save_Path = PathKwargs["Save_Path"]
-    SegRes_Path = PathKwargs["SegRes_Path"]
-    if not os.path.exists(SegRes_Path):
-        os.mkdir(SegRes_Path)
+    SegVideo_path = Save_Path + "Seg_Video"
+    SegSke_path = Save_Path + "Seg_Skeleton"
+    SegSec_Path = Save_Path + "Seg_Section"
     if not os.path.exists(Save_Path):
         os.mkdir(Save_Path)
+    if not os.path.exists(SegVideo_path):
+        os.mkdir(SegVideo_path)
+    if not os.path.exists(SegSke_path):
+        os.mkdir(SegSke_path)
+    if not os.path.exists(SegSec_Path):
+        os.mkdir(SegSec_Path)
     
     Steps = ParametersKwargs["Steps"]
     Thresholds = ParametersKwargs["Thresholds"]
@@ -248,14 +254,14 @@ def StartSegVedios(Filenames, PathKwargs, ParametersKwargs):
 
             ## 分割视频
             Video = Video_path + filename.split(".")[0] + ".mp4"
-            SegVideo(Video, Save_Path, SegSection, BodySection)
+            SegVideo(Video, SegVideo_path, SegSection, BodySection)
 
             ## 保存对应的骨骼信息
-            SkeletionPath = Save_Path + filename.split(".")[0]
+            SkeletionPath = SegSke_path + "/" + filename.split(".")[0]
             SegSkeleton(skeleton, SkeletionPath, SegSection, BodySection)
 
             ## 保存分割结果
-            with open(SegRes_Path + filename.split(".")[0] + ".txt","w") as SegFile:
+            with open(SegSec_Path + "/" + filename.split(".")[0] + ".txt","w") as SegFile:
                 print(SegSection, file= SegFile)
         except (IndexError, ValueError, TypeError):
             if filename not in ErrorFiles:
@@ -272,13 +278,12 @@ class SegError(Exception):
 
 if __name__ == "__main__":
     PathKwargs = {
-        "Video_path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/sort2Siger/张江涛/", 
-        "npz_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/skeleton/zhangjiangtao_npz/",
-        "Save_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/segVideo/张江涛/",
-        "SegRes_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/segVideo/张江涛_Seg/",
+        "Video_path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/sort2Siger/郑志文/", 
+        "npz_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/skeleton/zhengzhiwen_npz/",
+        "Save_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/seg_Video_Skeleton/",
     }
 
-    '''
+    
     Filenames = os.listdir(PathKwargs["npz_Path"])
     ## 第一次分割
     ParametersKwargs = {
@@ -315,5 +320,5 @@ if __name__ == "__main__":
     with open(PathKwargs["Video_path"] + "SegErrorFiles.txt",'w') as f_:
         for filename in SegErrorFiles:
             print(filename, file=f_)
-
+   '''
 
