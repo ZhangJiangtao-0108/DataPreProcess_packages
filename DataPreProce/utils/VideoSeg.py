@@ -266,7 +266,7 @@ def StartSegVedios(Filenames, PathKwargs, ParametersKwargs):
         except (IndexError, ValueError, TypeError):
             if filename not in ErrorFiles:
                 ErrorFiles.append(filename)
-        except SegError:
+        except (SegError, cv2.error):
             if filename not in SegErrorFiles:
                 SegErrorFiles.append(filename)
     return SegErrorFiles, ErrorFiles
@@ -278,8 +278,8 @@ class SegError(Exception):
 
 if __name__ == "__main__":
     PathKwargs = {
-        "Video_path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/sort2Siger/郑志文/", 
-        "npz_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/skeleton/zhengzhiwen_npz/",
+        "Video_path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/sort2Siger/陈玖玲/", 
+        "npz_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/skeleton/chenjiuling_npz/",
         "Save_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/seg_Video_Skeleton/",
     }
 
@@ -320,5 +320,5 @@ if __name__ == "__main__":
     with open(PathKwargs["Video_path"] + "SegErrorFiles.txt",'w') as f_:
         for filename in SegErrorFiles:
             print(filename, file=f_)
-   '''
+    '''
 
