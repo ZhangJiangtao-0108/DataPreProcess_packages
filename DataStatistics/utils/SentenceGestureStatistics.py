@@ -12,7 +12,7 @@ class SentenceGestureStatistics():
     '''
     def __init__(self, DataPath):
         self.DataPath = DataPath
-        self.fuhao = ',\!?。，？！、'
+        self.fuhao = ',\!?。，？！、 '
 
     def SentenceStatistics(self) -> dict:
         '''
