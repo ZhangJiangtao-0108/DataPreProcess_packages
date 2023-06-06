@@ -15,10 +15,10 @@ def SentenceCompare(Template_Sentences_list, Compare_Sentences_list, neglect:lis
         
     Template_Gestures_set = set(Template_Gestures)
     for gesture in Template_Gestures_set:
-        Template_Gesture_Sta[gesture] = Template_Gestures.count()
+        Template_Gesture_Sta[gesture] = Template_Gestures.count(gesture)
 
     Correct_Gestures_set = set(Correct_Gestures)
     for gesture in Correct_Gestures_set:
-        Correct_Gesture_sta[gesture] = Correct_Gestures.count()
+        Correct_Gesture_sta[gesture] = Correct_Gestures.count(gesture)
 
     return Template_Gesture_Sta, Correct_Gesture_sta
