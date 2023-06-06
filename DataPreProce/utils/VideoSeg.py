@@ -283,7 +283,7 @@ if __name__ == "__main__":
         "Save_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/seg_Video_Skeleton/",
     }
 
-    
+    '''
     Filenames = os.listdir(PathKwargs["npz_Path"])
     ## 第一次分割
     ParametersKwargs = {
@@ -311,7 +311,7 @@ if __name__ == "__main__":
     # print(Filenames)
     ParametersKwargs = {
         "Steps":[int(i) for i in range(16, 20)],
-        "Thresholds":[int(i*5) for i in range(4,6)],
+        "Thresholds":[int(i*5) for i in range(11,15)],
         "D":[int(i) for i in range(9,12)],
     }
     SegErrorFiles, ErrorFiles = StartSegVedios(Filenames, PathKwargs, ParametersKwargs)
@@ -320,5 +320,5 @@ if __name__ == "__main__":
     with open(PathKwargs["Video_path"] + "SegErrorFiles.txt",'w') as f_:
         for filename in SegErrorFiles:
             print(filename, file=f_)
-    '''
+    
 
