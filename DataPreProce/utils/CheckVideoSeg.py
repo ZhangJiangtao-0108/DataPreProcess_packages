@@ -26,10 +26,12 @@ def CheckKeyFrameNum(KeyFramePath, num = 16):
 
 
 if __name__ == "__main__":
-    video_path = "D:/张江涛/手势数据集/手语识别多模态数据/videos/seg_Video_Skeleton/Seg_Video/"
-    ske_path = "D:/张江涛/手势数据集/手语识别多模态数据/videos/seg_Video_Skeleton/Seg_Skeleton/"
+    root_Path = "D:/张江涛/手势数据集/手语识别多模态数据/videos/seg_Video_Skeleton/"
+    root_Path = "/media/zjt/ZJT/Sign_Language_Recognition_Data/Sign_Multimodal_Data/Video/seg_Video_Skeleton/"
+    video_path = root_Path + "Seg_Video/"
+    ske_path = root_Path + "Seg_Skeleton/"
     MatchingVideoAndSkeleton(video_path, ske_path)
     MatchingVideoAndSkeleton(ske_path, video_path)
 
-    KeyFramePath = "D:/张江涛/手势数据集/手语识别多模态数据/videos/seg_Video_Skeleton/Key_Frame/"
+    KeyFramePath = root_Path + "Key_Frame/"
     CheckKeyFrameNum(KeyFramePath)

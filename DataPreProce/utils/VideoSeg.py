@@ -277,19 +277,21 @@ class SegError(Exception):
         
 
 if __name__ == "__main__":
+    root_Path = "D:/张江涛/手势数据集/手语识别多模态数据/videos/"
+    root_Path = "/media/zjt/ZJT/Sign_Language_Recognition_Data/Sign_Multimodal_Data/Video/"
     PathKwargs = {
-        "Video_path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/sort2Siger/陈玖玲/", 
-        "npz_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/skeleton/chenjiuling_npz/",
-        "Save_Path":"D:/张江涛/手势数据集/手语识别多模态数据/videos/seg_Video_Skeleton/",
+        "Video_path":root_Path + "sort2Siger/张有为/", 
+        "npz_Path":root_Path + "skeleton/zhangyouwei_npz/",
+        "Save_Path":root_Path + "seg_Video_Skeleton/",
     }
 
-    '''
+    
     Filenames = os.listdir(PathKwargs["npz_Path"])
     ## 第一次分割
     ParametersKwargs = {
-        "Steps":[int(i) for i in range(10, 16)],
-        "Thresholds":[int(i*5) for i in range(6,11)],
-        "D":[int(i) for i in range(4,9) ],
+        "Steps":[int(i) for i in range(10, 20)],
+        "Thresholds":[int(i*5) for i in range(6,15)],
+        "D":[int(i) for i in range(4,12) ],
     }
     
     SegErrorFiles, ErrorFiles = StartSegVedios(Filenames, PathKwargs, ParametersKwargs)
@@ -320,5 +322,5 @@ if __name__ == "__main__":
     with open(PathKwargs["Video_path"] + "SegErrorFiles.txt",'w') as f_:
         for filename in SegErrorFiles:
             print(filename, file=f_)
-    
+    '''
 
