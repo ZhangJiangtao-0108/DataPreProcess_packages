@@ -33,6 +33,7 @@ class Labels2Text():
         sentences = []
         for i in range(len(gestures)):
             sentence = ''
+            # sentence = geatures2text(gestures[i])
             for word in gestures[i]:
                 if word != 'pos' and word != 'eos' and word != 'sos':
                     sentence += word
@@ -54,7 +55,12 @@ class Labels2Text():
         for gesture in self.Gesture_dic_.keys():
             self.Gesture_dic[self.Gesture_dic_[gesture]] = gesture
 
-
+def geatures2text(gestures):
+    sentence = ''
+    for word in gestures:
+        if word != 'pos' and word != 'eos' and word != 'sos':
+            sentence += word
+    return sentence
 
 
 
