@@ -6,3 +6,9 @@ PyWavelets -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
 tqdm
 ## 安装h5文件库:
 h5py
+## 安装nltk库：
+nltk -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
+## 安装opencv库
+opencv-python
+## a安装Levenshtein库:
+Levenshtein
