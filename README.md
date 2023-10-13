@@ -1,6 +1,9 @@
 # DataPreProcess_packages
-The data collected by MYO bracelet is preprocessed, including data cutting, stretching, filling and feature extraction.
+---
+This data processing library preprocesses the signals from the muscle current and IMU sensors, including data cutting, stretching, filling and feature extraction.
+This package also includes functions for sign language dataset production, data label transformation, recognition and translation metrics, and word frequency statistics。
 ## How to use this package
+---
 ### 1、Install related packages
 ```shell
 pip install Requirement.txt
@@ -24,6 +27,7 @@ from DataPreProce import *
 ```
 
 ## DataPreProce
+---
 ### Features of EMG data
 - IEMG: Definiyion of IEMG feature is definend as a summation of absolute value of the EMG sign amplitude.
 - MAV: Mean absolute value(MAV) feature is an aberage of absolute value of the EMG signal amplituden in a segment.
@@ -290,17 +294,46 @@ ParametersKwargs = {
 [5]I. Elamvazuthi, G. A. Ling, K. A. R. K. Nurhanim, P. Vasant, and S. Parasuraman, “Surface electromyography (sEMG) feature extraction based on Daubechies wavelets,” Proc. 2013 IEEE 8th Conf. Ind. Electron. Appl. ICIEA 2013, pp. 1492– 1495, 2013.  
 
 ## DataStatistics
+---
 ### utils
 | Utils | describe |
 |-----------------|----------|
 |SentenceGestureStatistics|Perform statistics on the dataset|
+|SentenceCompare|Compare the sentences|
 
 
 ## DataPostProce
+---
 ### utils
 | Utils | describe |
 |-----------------|----------|
 |Labels2Text|Convert digital labels into corresponding text|
 |Computer_WER|Calculate word error rate|
+|SLT_Indicators|Calculate the SLT metrics|
 
+# Citation
+---
+If you use this toolbox or benchmark in your research, please cite this project.
+```
+@ARTICLE{Zhang2023Multimodal,
+  author={Zhang, Jiangtao and Wang, Qingshan and Wang, Qi and Zheng, Zhiwen},
+  journal={IEEE Transactions on Mobile Computing}, 
+  title={Multimodal Fusion Framework Based on Statistical Attention and Contrastive Attention for Sign Language Recognition}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1-13},
+  doi={10.1109/TMC.2023.3235935}
+}
 
+@ARTICLE{Zhang2023HDTSLR,
+  author={Zhang, Jiangtao and Wang, Qingshan and Wang, Qi},
+  journal={IEEE Transactions on Mobile Computing}, 
+  title={HDTSLR: A Framework Based on Hierarchical Dynamic Positional Encoding for Sign Language Recognition}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1-13},
+  doi={10.1109/TMC.2023.3310712}
+}
+```
