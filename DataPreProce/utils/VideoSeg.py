@@ -280,8 +280,8 @@ if __name__ == "__main__":
     root_Path = "D:/张江涛/手势数据集/手语识别多模态数据/videos/"
     root_Path = "/media/zjt/ZJT/Sign_Language_Recognition_Data/Sign_Multimodal_Data/Video/"
     PathKwargs = {
-        "Video_path":root_Path + "sort2Siger/张有为/", 
-        "npz_Path":root_Path + "skeleton/zhangyouwei_npz/",
+        "Video_path":root_Path + "sort2Siger/郭富斌/", 
+        "npz_Path":root_Path + "skeleton/guofubin_npz/",
         "Save_Path":root_Path + "seg_Video_Skeleton/",
     }
 

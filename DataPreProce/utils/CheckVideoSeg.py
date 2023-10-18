@@ -5,24 +5,35 @@
 
 import os
 
-def MatchingVideoAndSkeleton(video_path, ske_path):
-    videoFiles = os.listdir(video_path)
-    skeFiles = os.listdir(ske_path)
-    skeList = []
-    for skeFile in skeFiles:
-        skeList.append(skeFile.split('.')[0])
+def MatchingVideoAndSkeleton(Tem_path, Check_path, isDel = False):
+    '''
+    检测文件夹中的数据是否匹配
+        Tem_path:模板文件夹
+        Check_path:检测的文件夹
+        isDel:是否进行文件删除
+    '''
+    TemFiles = os.listdir(Tem_path)
+    CheckFiles = os.listdir(Check_path)
+    TemList = []
+    for TemFile in TemFiles:
+        TemList.append(TemFile.split('.')[0])
     # print(skeFile)
 
-    for videoFile in videoFiles:
-        if videoFile.split(".")[0] not in skeList:
-            print(videoFile)
+    for CheckFile in CheckFiles:
+        if CheckFile.split(".")[0] not in TemList:
+            print(CheckFile)
+            if isDel:
+                os.remove(Check_path + CheckFile)
 
-def CheckKeyFrameNum(KeyFramePath, num = 16):
+
+def CheckKeyFrameNum(KeyFramePath, num = 16,  isDel = False):
     KeyFrameNames = os.listdir(KeyFramePath)
     for KeyFrameName in KeyFrameNames:
         FrameNum = len(os.listdir(KeyFramePath + KeyFrameName))
         if FrameNum != num:
             print(KeyFrameName)
+            if isDel:
+                os.rmdir(KeyFramePath + KeyFrameName)
 
 
 if __name__ == "__main__":
@@ -30,8 +41,15 @@ if __name__ == "__main__":
     root_Path = "/media/zjt/ZJT/Sign_Language_Recognition_Data/Sign_Multimodal_Data/Video/seg_Video_Skeleton/"
     video_path = root_Path + "Seg_Video/"
     ske_path = root_Path + "Seg_Skeleton/"
+    # MatchingVideoAndSkeleton(video_path, ske_path, isDel=True)
+    # MatchingVideoAndSkeleton(ske_path, video_path, isDel=True)
+
     MatchingVideoAndSkeleton(video_path, ske_path)
     MatchingVideoAndSkeleton(ske_path, video_path)
 
     KeyFramePath = root_Path + "Key_Frame/"
+    # CheckKeyFrameNum(KeyFramePath, isDel=True)
     CheckKeyFrameNum(KeyFramePath)
+
+    ## 删除不匹配的文件文件
+
