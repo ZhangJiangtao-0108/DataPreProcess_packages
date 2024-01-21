@@ -12,3 +12,5 @@ nltk -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
 opencv-python
 ## a安装Levenshtein库:
 Levenshtein
+## 安装pyEMD库:
+EMD-signal

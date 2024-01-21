@@ -14,6 +14,7 @@ from algorithm.emg_feature import EMGDataFeature
 from algorithm.imu_feature import IMUDataFeature
 from algorithm.Butter_filter import butter_filter, Wave_filter
 from algorithm.Data_Complement import Data_Complement
+from algorithm.EMD import DataEMD
 from utils.ReadFile import ReadFile
 
 ## 数据预处理
@@ -22,9 +23,14 @@ class DataPreprocessing():
         '''进行数据预处理
             kwargs：
                 kwargs_pre：
-                    emg：EMG数据
-                    imu:：IMU数据
-                    emg_F：EMG数据的频域处理信息
+                    isCut: 决定数据是否需要裁切
+                    isStretch: 决定数据是否需要拉伸
+                    data_time: 拉伸到data_time时间长度
+                    isFill: 决定数据是否需要填补
+                    isFilter：决定数据是否需要滤波
+                    isIncreEmgDim: 决定EMG数据是否需要扩充维度
+                    isMinusMeanEmgData：决定EMG数据每一维是否减去均值
+                    segment：数据裁剪个数
                     segment：决定数据的裁剪段数
                     emgChannel：选择emg数据的通道
         '''
@@ -206,12 +212,15 @@ class ExtractDataFeature():
 
             kwargs_pre: 数据预处理参数
                 args:
+                    isFilter：决定数据是否需要滤波
                     isCut: 决定数据是否需要裁切
                     isStretch: 决定数据是否需要拉伸
                     data_time: 拉伸到data_time时间长度
                     isFill: 决定数据是否需要填补
                     isIncreEmgDim: 决定EMG数据是否需要扩充维度
-            kwargs_feature: 数据特征提取参数
+                    isMinusMeanEmgData：决定EMG数据每一维是否减去均值
+                    isEMD：决定是否EMD分解
+                    segment：数据裁剪个数
                 args:
                     EMGFeatureType: 提取EMG数据的特征类型，包括：[IEMG, MAV, MAV1, MAV2, SSI, VAR, TM_N, RMS, V, LOG, WL, AAC, DASDV, ZC, MYOP, WAMP, SSC, MAVSLP, MHW, MTW, HIST, HIST, AR, CC]
                     EMGFeatureKwargs: 对应EMG数据特征的参数
@@ -228,6 +237,7 @@ class ExtractDataFeature():
         # print(kwargs)
         self.kwargs_pre = kwargs['kwargs_pre']
         self.kwargs_feature = kwargs['kwargs_feature']  
+        self.segmment = kwargs['kwargs_pre'].get("segment", None)
         self.dataPre = DataPreprocessing(kwargs_pre = self.kwargs_pre)
 
     ## 提取emg信号特征
@@ -272,29 +282,46 @@ class ExtractDataFeature():
         feature_list = []
         for EMGFeatureType in EMGFeatureTypes:
             Fea = []
-            if self.kwargs_pre["segment"]:
+            if self.segmment:
                 for i in range(len(self.emg)):
+                    ## 分段情况下无法进行EMD分解
                     feature = EMGDataFeature(self.emg[i])
                     Fea.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs))
             else:
-                feature = EMGDataFeature(self.emg)
-                Fea.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs)) 
+                ## 增加EMD分解
+                ## emg: [emg_dim_1, emg_dim_2]
+                if self.kwargs_pre["isEMD"] and ("EMG" in self.kwargs_pre["EMD_args"]["DataType"]):
+                    ## emg_imfs: [emg_dim_2, max_imf, emg_dim_1]
+                    ## emg_ifrs: [emg_dim_2, max_imf, emg_dim_1]
+                    emg_imfs, _, emg_ifrs = DataEMD(self.emg, max_imf =self.kwargs_pre["EMD_args"]["max_imf"], order=self.kwargs_pre["EMD_args"]["order"],alpha=self.kwargs_pre["EMD_args"]["alpha"])
+                    ## 这里使用合并后的数据按照时间维度进行特征提取
+                    emg_imfs,emg_ifrs = np.transpose(emg_imfs, (1,0,2)), np.transpose(emg_ifrs, (1,0,2)) 
+                    emg_ = np.concatenate((emg_imfs,emg_ifrs), axis=1)
+                    # print(emg_imfs.shape)
+                    # print(emg_ifrs.shape)
+                    # print(emg_.shape)
+                    features = []
+                    for j in range(len(emg_imfs)):
+                        emg_feature = EMGDataFeature(emg_[j])
+                        features.append(emg_feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs)) 
+                    Fea.append(features)
+                else:
+                    feature = EMGDataFeature(self.emg)
+                    Fea.append(feature.getFeature(EMGFeatureType, kwargs = EMGFeatureKwargs)) 
             feature_list.append(Fea)
         return np.array(feature_list, dtype=object)
 
     ## 提取imu信号特征
     def ImuFeature(self, ):
         IMUFeatureTypes = self.kwargs_feature['IMUFeatureTypes']
-        imu_Euler_angle = []
         feature_list = []
+        feature_bool = False
         for IMUFeatureType in IMUFeatureTypes:
             Fea = []
-            if self.kwargs_pre["segment"]:
+            if self.segmment:
                 for i in range(len(self.imu)):
                     feature = IMUDataFeature(self.imu[i])
                     Fea.append(feature.getFeature(IMUFeatureType))
-
-
                     # pitch, roll, yaw = data_change(self.imu[s])
                     # angle = []
                     # # for i in range(len(pitch)):
@@ -309,13 +336,20 @@ class ExtractDataFeature():
                     # angle.append(np.concatenate((self.imu[s][:,:4], pitch.reshape(self.imu[s].shape[0],1), roll.reshape(self.imu[s].shape[0],1), yaw.reshape(self.imu[s].shape[0],1)), axis=1))
                     # imu_Euler_angle.append(angle)
                 # return np.array(imu_Euler_angle)
+                feature_list.append(Fea)
+                features = np.array(feature_list)
             else:
                 feature = IMUDataFeature(self.imu)
-                Fea.append(feature.getFeature(IMUFeatureType))
+                F = feature.getFeature(IMUFeatureType)
+                if feature_bool:
+                    features = np.concatenate((features, F), axis=1)
+                else:
+                    features = F  
+                    feature_bool = True         
+                # Fea.append(feature.getFeature(IMUFeatureType))
                 # pitch, roll, yaw = data_change(self.imu)
-                # return np.concatenate((self.imu[:,:4], pitch.reshape(self.imu.shape[0],1), roll.reshape(self.imu.shape[0],1), yaw.reshape(self.imu.shape[0],1)), axis=1)
-            feature_list.append(Fea)
-        return np.array(feature_list, dtype=object)
+                # return np.concatenate((self.imu[:,:4], pitch.reshape(self.imu.shape[0],1), roll.reshape(self.imu.shape[0],1), yaw.reshape(self.imu.shape[0],1)), axis=1)  
+        return features
 
     def getFeature(self, emg, imu):
         '''整合信号

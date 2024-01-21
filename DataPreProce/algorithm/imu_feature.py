@@ -4,7 +4,7 @@
 import numpy as np
 from  scipy import signal
 from algorithm.Attitude_Angle_solution import data_change
-
+from algorithm.imu_position_rotation import Computer_Pos_Roa
 
 
 class IMUDataFeature():
@@ -43,6 +43,22 @@ class IMUDataFeature():
             Calculate the std value of each dimension.
         '''
         return np.std(self.Data, axis= 0)
+    
+    def POS_ROA(self, Deta= 0.02):
+        '''
+            Calculate the position and rotation value of each time.
+            Deta:interval time
+        '''
+        data_len = len(self.Data)
+        Positions, Rotations = Computer_Pos_Roa(self.Data, Deta)
+        Rotations = Rotations.reshape(data_len, -1)
+        return np.concatenate((Positions, Rotations), axis = -1)
+    
+    def QUAT(self,):
+        '''
+            Calculate the QUAT value of each dimension.
+        '''
+        return self.Data[:, :4]
 
     def getFeature(self, FeatureType, **kwargs):
         '''
@@ -61,5 +77,9 @@ class IMUDataFeature():
             return self.Var()
         elif FeatureType == "STD":
             return self.Std()
+        elif FeatureType == "POS&ROA":
+            return self.POS_ROA()
+        elif FeatureType == "QUAT":
+            return self.QUAT()
         else:
             raise TypeError("Not " + FeatureType + " Feature!!")

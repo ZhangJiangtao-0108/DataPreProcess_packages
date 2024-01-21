@@ -58,6 +58,8 @@ from DataPreProce import *
 - SUM:Calculate the sum value of each dimension
 - VAR:Calculate the var value of each dimension
 - STD:Calculate the std value of each dimension
+- POS&ROA:Calculate the position and rotation value of each time
+
 ### Parameter Settings
 #### 1.Data processing and feature extraction parameter setting
 ```json
@@ -84,6 +86,13 @@ from DataPreProce import *
                   },
                   "isMinusMeanEmgData":True,
                   "isIncreEmgDim":False,
+                  "isEMD":True,
+                        "EMD_args":{
+                            "DataType":["EMG", "IMU"],
+                            "max_imf":-1,
+                            "order":False,
+                            "alpha":None,
+                        },
                   "segment":100,
                   "emgChannel":[]
                    },
@@ -100,7 +109,7 @@ from DataPreProce import *
                                         "MTW_K":1,
                                         "N":2
                                         },
-                    "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD"],
+                    "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD", "POS&ROA"],
                     },
 }
 ```
@@ -115,6 +124,7 @@ from DataPreProce import *
 | Filter_args | The parameter of filter, two filtering methods can be selected |
 | isMinusMeanEmgData | Determine if the EMG data needs to be subtracted from the mean |
 | isIncreEmgDim | Determine whether the EMG data needs to be dimensioned |
+| isEMD | Determine whether data needs to be EMD |
 | segment | Number of data segments |
 | emgChannel | Select the EMG data channel |
 ###### Filter_args
@@ -169,6 +179,7 @@ from DataPreProce import *
 | SUM | None | Calculate the sum value of each dimension |
 | VAR | None | Calculate the var value of each dimension |
 | STD | None | Calculate the std value of each dimension |
+| POS&ROA | Deta | Calculate the position and rotation value of each time|
 #### 2.DataSets parameter setting
 ```json
 kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/",
@@ -199,6 +210,13 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
                         },
                         "isMinusMeanEmgData":True,
                         "isIncreEmgDim":False,
+                        "isEMD":True,
+                        "EMD_args":{
+                            "DataType":["EMG", "IMU"],
+                            "max_imf":-1,
+                            "order":False,
+                            "alpha":None,
+                        },
                         "segment":100,
                         "emgChannel":[]
                         },
@@ -216,7 +234,7 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
                                                 "N":2
                                                 }
                             },
-                            "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD"],
+                            "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD", "POS&ROA"],
                     }
     }
 ```
@@ -227,9 +245,11 @@ kwargs = {  "DataPath":"C:/Users/张江涛/Desktop/imu测试/imu_sentence数据/
 |Butter_filter||
 |cutting_algorithm||
 |Data_Complement||
+|EMD|Perform EMD decomposition of data|
 |emg_correct||
 |emg_feature||
 |imu_feature||
+|imu_position_rotation|Calculate the position and rotation value of each time|
 |Laplace|Implementing the Laplace-algorithm|
 |Normalization|Normalize the data|
 

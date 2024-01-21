@@ -1,15 +1,15 @@
 from numpy.core.numeric import count_nonzero
 from numpy.core.records import array
-from DataPre import  ReadData, ExtractDataFeature
+from DataPre import  ReadData, ExtractDataFeature, dataFeature
 import numpy as np
 import matplotlib.pyplot as plt
-from dtaidistance import dtw
-from dtaidistance import dtw_visualisation as dtwvis
+# from dtaidistance import dtw
+# from dtaidistance import dtw_visualisation as dtwvis
 from tqdm import tqdm
 import os
 
 if __name__ == '__main__':
-    datapath =  r'D:/张江涛/实验/数据/word/'
+    datapath =  r"/home/zjt/zhangjiangtao/github-code/Sign_Emotion_recognition/data/high_negtive/"
     kwargs_pre={
                 "isCut":True,
                 "isStretch":True,
@@ -31,8 +31,15 @@ if __name__ == '__main__':
                                 }
                 },
                 "isMinusMeanEmgData":True,
+                "isEMD":True,
+                        "EMD_args":{
+                            "DataType":["EMG"],
+                            "max_imf":6,
+                            "order":True,
+                            "alpha":None,
+                        },
                 "isIncreEmgDim":False,
-                "segment":100
+                # "segment":100
                 }
     kwargs_feature={
                     "EMGFeatureTypes":["IEMG","MAV","SSI","VAR","WL"], 
@@ -47,8 +54,32 @@ if __name__ == '__main__':
                                         "MTW_K":1,
                                         "N":2
                                         },
-                    "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD"],
+                    # "IMUFeatureTypes":["EULERANGLE", "MEAN", "SUM", "VAR", "STD"],
+                    "IMUFeatureTypes":["POS&ROA", "QUAT"],
                     }
+
+    data = ReadData(datapath)
+    dataFeatureExtract = ExtractDataFeature(kwargs_pre=kwargs_pre, kwargs_feature=kwargs_feature)
+    emg, imu, label, scale = next(data)
+    emg_feature, imu_feature = dataFeatureExtract.getFeature(emg, imu)
+    print(emg_feature.shape)
+    print(imu_feature.shape)
+    print(imu_feature.shape)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## emg 数据进行规整
 def emgnorm(emg):
     emg = np.array(emg)
