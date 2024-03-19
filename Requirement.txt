@@ -14,3 +14,5 @@ opencv-python
 Levenshtein
 ## 安装pyEMD库:
 EMD-signal
+## 安装UMAP库
+umap-learn
